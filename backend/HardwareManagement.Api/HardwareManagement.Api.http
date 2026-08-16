@@ -1,0 +1,6 @@
+@HardwareManagement.Api_HostAddress = http://localhost:5012
+
+GET {{HardwareManagement.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
