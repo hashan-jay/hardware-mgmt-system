@@ -16,7 +16,12 @@ public record DashboardDto(
     int EmployeesWithHardware,
     IEnumerable<ComponentAnalyticsDto> Components,
     IEnumerable<EmployeeLoadDto> Holders,
-    IEnumerable<string> Insights);
+    IEnumerable<string> Insights,
+    IEnumerable<TrendPointDto> WeeklyTrend,
+    IEnumerable<DayPulseDto> DailyPulse,
+    IEnumerable<BrandShareDto> BrandShares,
+    IEnumerable<ScanPulseDto> RecentScans,
+    IEnumerable<ActivityPointDto> ActivityPulse);
 
 public record ComponentAnalyticsDto(
     int Id,
@@ -29,6 +34,31 @@ public record ComponentAnalyticsDto(
     int IssuedNotWorkingCount);
 
 public record EmployeeLoadDto(int EmployeeId, string FullName, int ItemCount);
+
+public record TrendPointDto(string Label, string WeekStart, int Added, int Issued, int Reissued);
+
+public record DayPulseDto(string Label, string Date, int Added, int Issued, int Reissued);
+
+public record BrandShareDto(
+    int Id,
+    string Name,
+    string ComponentName,
+    int ItemCount,
+    int IssuedCount,
+    int InStockCount,
+    int NotWorkingCount);
+
+public record ScanPulseDto(
+    int Id,
+    string Title,
+    DateTime StartedAt,
+    string Status,
+    int ScannedCount,
+    int MissingCount,
+    int WorkingCount,
+    int NotWorkingCount);
+
+public record ActivityPointDto(string Label, string Date, int Total, int Creates, int Updates, int Scans);
 
 public record ComponentSummaryDto(int Id, string Name, string CodePrefix, int BrandCount, int ItemCount);
 

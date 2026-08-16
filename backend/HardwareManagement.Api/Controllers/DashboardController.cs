@@ -12,6 +12,21 @@ namespace HardwareManagement.Api.Controllers;
 [Route("api/[controller]")]
 public class DashboardController(AppDbContext db) : ControllerBase
 {
+    private static readonly TimeZoneInfo OfficeZone = TimeZoneInfo.FindSystemTimeZoneById(
+        OperatingSystem.IsWindows() ? "India Standard Time" : "Asia/Kolkata");
+
+    private sealed record ItemSnapshot(
+        int ComponentId,
+        int BrandId,
+        bool Working,
+        bool Issued,
+        int? CurrentEmployeeId,
+        DateTime CreatedAt,
+        DateTime? OriginalIssuedDate,
+        DateTime? HandedDate,
+        bool IsNewAcquisition,
+        bool Reissued);
+
     [HttpGet]
     public async Task<ActionResult<DashboardDto>> Get()
     {
@@ -22,17 +37,26 @@ public class DashboardController(AppDbContext db) : ControllerBase
             .Select(x => new { x.Id, x.Name })
             .ToListAsync();
 
+        var brands = await db.Brands
+            .AsNoTracking()
+            .Where(x => !x.IsDeleted)
+            .Select(x => new { x.Id, x.Name, ComponentName = x.HardwareComponent!.Name })
+            .ToListAsync();
+
         var items = await db.HardwareItems
             .AsNoTracking()
             .Where(x => !x.IsDeleted)
-            .Select(x => new
-            {
-                ComponentId = x.Brand!.HardwareComponentId,
-                Working = x.WorkingStatus == ItemWorkingStatus.Working,
-                Issued = x.CurrentEmployeeId != null || (x.HandedTo != null && x.HandedTo != ""),
+            .Select(x => new ItemSnapshot(
+                x.Brand!.HardwareComponentId,
+                x.BrandId,
+                x.WorkingStatus == ItemWorkingStatus.Working,
+                x.CurrentEmployeeId != null || (x.HandedTo != null && x.HandedTo != ""),
                 x.CurrentEmployeeId,
-                HolderName = x.CurrentEmployee != null ? x.CurrentEmployee.FullName : x.HandedTo
-            })
+                x.CreatedAt,
+                x.OriginalIssuedDate,
+                x.HandedDate,
+                x.IsNewAcquisition,
+                x.PersonChangeReason != null && x.PersonChangeReason != ""))
             .ToListAsync();
 
         var employees = await db.Employees
@@ -69,6 +93,30 @@ public class DashboardController(AppDbContext db) : ControllerBase
             .ThenBy(x => x.FullName)
             .ToList();
 
+        var brandShares = brands
+            .Select(brand =>
+            {
+                var rows = items.Where(x => x.BrandId == brand.Id).ToList();
+                return new BrandShareDto(
+                    brand.Id,
+                    brand.Name,
+                    brand.ComponentName,
+                    rows.Count,
+                    rows.Count(x => x.Issued),
+                    rows.Count(x => !x.Issued),
+                    rows.Count(x => !x.Working));
+            })
+            .Where(x => x.ItemCount > 0)
+            .OrderByDescending(x => x.ItemCount)
+            .ThenBy(x => x.Name)
+            .ToList();
+
+        var today = ToOfficeDate(DateTime.UtcNow);
+        var weeklyTrend = BuildWeeklyTrend(items, today);
+        var dailyPulse = BuildDailyPulse(items, today);
+        var activityPulse = await BuildActivityPulseAsync(today);
+        var recentScans = await BuildRecentScansAsync();
+
         var issuedItems = items.Count(x => x.Issued);
         var inStockItems = items.Count(x => !x.Issued);
         var issuedNotWorking = items.Count(x => x.Issued && !x.Working);
@@ -78,11 +126,11 @@ public class DashboardController(AppDbContext db) : ControllerBase
 
         var dto = new DashboardDto(
             components.Count,
-            await db.Brands.CountAsync(x => !x.IsDeleted),
+            brands.Count,
             items.Count,
             items.Count(x => x.Working),
             notWorking,
-            await db.HardwareItems.CountAsync(x => !x.IsDeleted && x.IsNewAcquisition),
+            items.Count(x => x.IsNewAcquisition),
             await db.InventoryScans.CountAsync(x => x.Status == ScanStatus.InProgress),
             issuedItems,
             inStockItems,
@@ -92,9 +140,96 @@ public class DashboardController(AppDbContext db) : ControllerBase
             employeesWithHardware,
             analytics,
             holders.Where(x => x.ItemCount > 0),
-            BuildInsights(analytics, issuedNotWorking, workingStock, employees.Count, employeesWithHardware, items.Count));
+            BuildInsights(analytics, issuedNotWorking, workingStock, employees.Count, employeesWithHardware, items.Count, weeklyTrend),
+            weeklyTrend,
+            dailyPulse,
+            brandShares,
+            recentScans,
+            activityPulse);
 
         return Ok(dto);
+    }
+
+    private async Task<List<ScanPulseDto>> BuildRecentScansAsync()
+    {
+        return await db.InventoryScans
+            .AsNoTracking()
+            .OrderByDescending(scan => scan.StartedAt)
+            .Take(14)
+            .Select(scan => new ScanPulseDto(
+                scan.Id,
+                scan.Title,
+                scan.StartedAt,
+                scan.Status.ToString(),
+                scan.ScanItems.Count(item => item.IsPresent),
+                scan.ScanItems.Count(item => !item.IsPresent),
+                scan.ScanItems.Count(item => item.WorkingStatus == ItemWorkingStatus.Working),
+                scan.ScanItems.Count(item => item.WorkingStatus == ItemWorkingStatus.NotWorking)))
+            .ToListAsync();
+    }
+
+    private async Task<List<ActivityPointDto>> BuildActivityPulseAsync(DateTime today)
+    {
+        var start = today.AddDays(-13);
+        var startUtc = TimeZoneInfo.ConvertTimeToUtc(DateTime.SpecifyKind(start, DateTimeKind.Unspecified), OfficeZone);
+        var logs = await db.AuditLogs
+            .AsNoTracking()
+            .Where(x => x.CreatedAt >= startUtc)
+            .Select(x => new { x.CreatedAt, x.Action })
+            .ToListAsync();
+
+        return Enumerable.Range(0, 14)
+            .Select(offset =>
+            {
+                var day = start.AddDays(offset);
+                var rows = logs.Where(x => ToOfficeDate(x.CreatedAt) == day).ToList();
+                return new ActivityPointDto(
+                    day.ToString("dd MMM"),
+                    day.ToString("yyyy-MM-dd"),
+                    rows.Count,
+                    rows.Count(x => x.Action == "Create"),
+                    rows.Count(x => x.Action is "Update" or "Complete"),
+                    rows.Count(x => x.Action == "Scan"));
+            })
+            .ToList();
+    }
+
+    private static List<TrendPointDto> BuildWeeklyTrend(IReadOnlyCollection<ItemSnapshot> items, DateTime today)
+    {
+        var thisWeek = WeekStart(today);
+        return Enumerable.Range(0, 12)
+            .Select(offset =>
+            {
+                var week = thisWeek.AddDays((offset - 11) * 7);
+                var end = week.AddDays(7);
+                var added = items.Count(x => InRange(ToOfficeDate(x.CreatedAt), week, end));
+                var issued = items.Count(x => FirstIssuedOn(x) is { } issuedOn && InRange(issuedOn, week, end));
+                var reissued = items.Count(x => ReissuedOn(x) is { } reissuedOn && InRange(reissuedOn, week, end));
+                return new TrendPointDto(
+                    week.ToString("dd MMM"),
+                    week.ToString("yyyy-MM-dd"),
+                    added,
+                    issued,
+                    reissued);
+            })
+            .ToList();
+    }
+
+    private static List<DayPulseDto> BuildDailyPulse(IReadOnlyCollection<ItemSnapshot> items, DateTime today)
+    {
+        var start = today.AddDays(-13);
+        return Enumerable.Range(0, 14)
+            .Select(offset =>
+            {
+                var day = start.AddDays(offset);
+                return new DayPulseDto(
+                    day.ToString("dd MMM"),
+                    day.ToString("yyyy-MM-dd"),
+                    items.Count(x => ToOfficeDate(x.CreatedAt) == day),
+                    items.Count(x => FirstIssuedOn(x) == day),
+                    items.Count(x => ReissuedOn(x) == day));
+            })
+            .ToList();
     }
 
     private static IEnumerable<string> BuildInsights(
@@ -103,7 +238,8 @@ public class DashboardController(AppDbContext db) : ControllerBase
         int workingStock,
         int employeeCount,
         int employeesWithHardware,
-        int totalItems)
+        int totalItems,
+        IReadOnlyCollection<TrendPointDto> weeklyTrend)
     {
         var insights = new List<string>();
 
@@ -127,9 +263,44 @@ public class DashboardController(AppDbContext db) : ControllerBase
         if (workingStock > 0)
             insights.Add($"{workingStock} working item{(workingStock == 1 ? " is" : "s are")} in stock and ready to issue.");
 
+        var recent = weeklyTrend.TakeLast(4).ToList();
+        var recentAdded = recent.Sum(x => x.Added);
+        var recentIssued = recent.Sum(x => x.Issued);
+        if (recentIssued > recentAdded && workingStock == 0 && recentIssued > 0)
+            insights.Add($"Issues outpaced new stock over the last 4 weeks ({recentIssued} first issues vs {recentAdded} added) with no working spare left.");
+
         if (insights.Count == 0 && totalItems > 0)
             insights.Add("No urgent repair or replenishment actions right now.");
 
         return insights.Take(6);
+    }
+
+    private static DateTime? FirstIssuedOn(ItemSnapshot item)
+    {
+        var date = item.OriginalIssuedDate ?? item.HandedDate;
+        return date?.Date;
+    }
+
+    private static DateTime? ReissuedOn(ItemSnapshot item) =>
+        item.Reissued ? item.HandedDate?.Date : null;
+
+    private static bool InRange(DateTime date, DateTime startInclusive, DateTime endExclusive) =>
+        date >= startInclusive && date < endExclusive;
+
+    private static DateTime WeekStart(DateTime date)
+    {
+        var offset = ((int)date.DayOfWeek + 6) % 7;
+        return date.AddDays(-offset);
+    }
+
+    private static DateTime ToOfficeDate(DateTime value)
+    {
+        if (value.Kind == DateTimeKind.Utc)
+            return TimeZoneInfo.ConvertTimeFromUtc(value, OfficeZone).Date;
+
+        if (value.Kind == DateTimeKind.Local)
+            return TimeZoneInfo.ConvertTime(value, OfficeZone).Date;
+
+        return value.Date;
     }
 }

@@ -1,10 +1,6 @@
 import { useState } from 'react';
-import {
-  DonutChart,
-  type Color,
-  type CustomTooltipProps,
-  type EventProps,
-} from '@tremor/react';
+import type { Color } from '@tremor/react';
+import Donut3D from './Donut3D';
 
 export interface PieSlice {
   name: string;
@@ -28,41 +24,17 @@ const colorFill: Record<string, string> = {
   stone: 'bg-stone-500',
 };
 
-const formatCount = (value: number) => `${value} item${value === 1 ? '' : 's'}`;
-
-function sliceName(value: EventProps): string | undefined {
-  if (!value) return undefined;
-  if (typeof value.name === 'string') return value.name;
-  return value.categoryClicked;
-}
-
-function DonutTooltip({ active, payload }: CustomTooltipProps) {
-  if (!active || !payload?.[0]) return null;
-  const point = payload[0];
-  return (
-    <div className="rounded-xl border border-[var(--line)] bg-white px-3 py-2 shadow-tremor-dropdown">
-      <p className="text-xs text-[var(--muted)]">{String(point.name)}</p>
-      <p className="mt-0.5 text-sm font-semibold text-[var(--ink)]">{formatCount(Number(point.value ?? 0))}</p>
-    </div>
-  );
-}
-
 export default function LivePieChart({ title, caption, data, colors, centerLabel }: Props) {
-  const [selected, setSelected] = useState<EventProps>(null);
+  const [selectedName, setSelectedName] = useState<string | null>(null);
   const slices = data.filter((slice) => slice.value > 0);
-  const selectedName = sliceName(selected);
   const selectedSlice = slices.find((slice) => slice.name === selectedName);
   const total = slices.reduce((sum, slice) => sum + slice.value, 0);
   const share = selectedSlice && total ? Math.round((selectedSlice.value / total) * 100) : null;
-  const label = selectedSlice ? `${share}%` : String(total);
 
-  const toggleSlice = (slice: PieSlice) => {
-    setSelected((current) =>
-      sliceName(current) === slice.name
-        ? null
-        : { eventType: 'slice', categoryClicked: slice.name, name: slice.name, value: slice.value },
-    );
-  };
+  const donutSlices = slices.map((slice, index) => ({
+    ...slice,
+    color: colors[index] ?? 'teal',
+  }));
 
   return (
     <article className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
@@ -78,37 +50,23 @@ export default function LivePieChart({ title, caption, data, colors, centerLabel
         <p className="py-10 text-center text-sm text-[var(--muted)]">No values to chart yet.</p>
       ) : (
         <div className="flex flex-col items-center">
-          <div className="live-donut">
-            <DonutChart
-              data={slices}
-              index="name"
-              category="value"
-              variant="donut"
-              colors={colors.slice(0, slices.length)}
-              showAnimation
-              animationDuration={800}
-              showLabel
-              label={label}
-              valueFormatter={formatCount}
-              className="h-56 w-56"
-              onValueChange={setSelected}
-              customTooltip={DonutTooltip}
-              noDataText="No values to chart yet."
-            />
-          </div>
-          <p className="mt-1 text-center text-xs text-[var(--muted)]">
-            {selectedSlice
-              ? `${selectedSlice.name}: ${selectedSlice.value} of ${total}`
-              : centerLabel ?? 'Hover a ring, then click to pin it'}
-          </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
+          <Donut3D
+            slices={donutSlices}
+            selectedName={selectedName}
+            onSelect={setSelectedName}
+            centerValue={selectedSlice ? `${share}%` : String(total)}
+            centerHint={
+              selectedSlice ? `${selectedSlice.name} · ${selectedSlice.value}` : centerLabel ?? 'Click a ring'
+            }
+          />
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
             {slices.map((slice, index) => {
               const active = selectedName === slice.name;
               return (
                 <button
                   key={slice.name}
                   type="button"
-                  onClick={() => toggleSlice(slice)}
+                  onClick={() => setSelectedName(active ? null : slice.name)}
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition ${
                     active
                       ? 'border-[var(--brand)] bg-[rgba(15,107,92,0.08)] font-medium text-[var(--ink)]'

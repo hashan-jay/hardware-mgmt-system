@@ -45,7 +45,7 @@ const config: Config = {
   safelist: [
     {
       pattern:
-        /^(bg|text|fill|stroke)-(teal|amber|emerald|rose|sky|stone)-(400|500|600)$/,
+        /^(bg|text|fill|stroke)-(teal|amber|emerald|rose|sky|stone|gray)-(400|500|600)$/,
     },
   ],
 };

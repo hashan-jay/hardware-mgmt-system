@@ -92,6 +92,11 @@ export interface Dashboard {
   components: ComponentAnalytics[];
   holders: EmployeeLoad[];
   insights: string[];
+  weeklyTrend: TrendPoint[];
+  dailyPulse: DayPulse[];
+  brandShares: BrandShare[];
+  recentScans: ScanPulse[];
+  activityPulse: ActivityPoint[];
 }
 
 export interface ComponentAnalytics {
@@ -109,6 +114,52 @@ export interface EmployeeLoad {
   employeeId: number;
   fullName: string;
   itemCount: number;
+}
+
+export interface TrendPoint {
+  label: string;
+  weekStart: string;
+  added: number;
+  issued: number;
+  reissued: number;
+}
+
+export interface DayPulse {
+  label: string;
+  date: string;
+  added: number;
+  issued: number;
+  reissued: number;
+}
+
+export interface BrandShare {
+  id: number;
+  name: string;
+  componentName: string;
+  itemCount: number;
+  issuedCount: number;
+  inStockCount: number;
+  notWorkingCount: number;
+}
+
+export interface ScanPulse {
+  id: number;
+  title: string;
+  startedAt: string;
+  status: string;
+  scannedCount: number;
+  missingCount: number;
+  workingCount: number;
+  notWorkingCount: number;
+}
+
+export interface ActivityPoint {
+  label: string;
+  date: string;
+  total: number;
+  creates: number;
+  updates: number;
+  scans: number;
 }
 
 export interface Scan {
