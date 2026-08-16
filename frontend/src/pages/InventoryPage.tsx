@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { brandsApi, componentsApi, itemsApi } from '../api/services';
 import CreatableSelect from '../components/CreatableSelect';
@@ -147,24 +146,6 @@ export default function InventoryPage() {
       setError(apiMessage(err, 'Could not save this inventory item.'));
     } finally {
       setBusy(false);
-    }
-  };
-
-  const onDeleteComponent = async (id: number, label: string) => {
-    if (!confirm(`Delete component "${label}" and all related brands/items?`)) return;
-    try {
-      await componentsApi.remove(id);
-      if (componentId === id) {
-        setComponentId(null);
-        setBrandId(null);
-      }
-      if (filterComponentId === id) {
-        setFilterComponentId(null);
-        setFilterBrandId(null);
-      }
-      await Promise.all([loadComponents(), loadItems()]);
-    } catch {
-      setError('Could not delete this component.');
     }
   };
 
@@ -342,46 +323,6 @@ export default function InventoryPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-      </section>
-
-      <section>
-        <h3 className="mb-4 text-lg font-semibold">Browse Components</h3>
-        {components.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">Add a hardware component from the first dropdown to get started.</p>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {components.map((component) => (
-              <article
-                key={component.id}
-                className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold">{component.name}</h3>
-                    <p className="mt-1 text-sm text-[var(--muted)]">{component.brandCount} brands</p>
-                  </div>
-                  <span className="rounded-full bg-[var(--bg)] px-2 py-1 text-xs text-[var(--muted)]">
-                    {component.itemCount} items
-                  </span>
-                </div>
-                <div className="mt-4 flex gap-3">
-                  <Link
-                    to={`/components/${component.id}`}
-                    className="rounded-lg bg-[var(--brand)] px-3 py-1.5 text-sm text-white"
-                  >
-                    Open
-                  </Link>
-                  <button
-                    onClick={() => onDeleteComponent(component.id, component.name)}
-                    className="rounded-lg border border-[var(--danger)] px-3 py-1.5 text-sm text-[var(--danger)]"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </article>
-            ))}
           </div>
         )}
       </section>

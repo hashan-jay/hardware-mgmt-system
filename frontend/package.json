@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.10",
+    "@remixicon/react": "^4.9.0",
+    "@tremor/react": "^3.18.7",
     "axios": "^1.19.0",
     "html5-qrcode": "^2.3.8",
     "jsbarcode": "^3.12.3",

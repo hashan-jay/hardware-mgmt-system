@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, PackageCheck, ShieldAlert, Users } from 'lucide-react';
 import { dashboardApi } from '../api/services';
+import LivePieChart from '../components/LivePieChart';
 import type { ComponentAnalytics, Dashboard } from '../types';
 
 function pct(part: number, whole: number) {
@@ -60,10 +61,25 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    dashboardApi
-      .get()
-      .then(setData)
-      .catch(() => setError('Failed to load dashboard.'));
+    let active = true;
+    const load = async (initial = false) => {
+      try {
+        const next = await dashboardApi.get();
+        if (active) {
+          setData(next);
+          setError('');
+        }
+      } catch {
+        if (active && initial) setError('Failed to load dashboard.');
+      }
+    };
+
+    void load(true);
+    const timer = window.setInterval(() => void load(), 15000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
   }, []);
 
   if (error) return <p className="text-[var(--danger)]">{error}</p>;
@@ -128,31 +144,41 @@ export default function DashboardPage() {
         </article>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
-        <article className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
-          <h3 className="text-lg font-semibold">Deployment mix</h3>
-          <p className="mt-1 mb-4 text-sm text-[var(--muted)]">
-            Issued vs sitting in inventory. A high issued share with no spare is a restock signal.
-          </p>
-          <StackedBar
-            segments={[
-              { value: data.issuedItems, color: 'var(--brand)', label: 'Issued' },
-              { value: data.inStockItems, color: 'var(--accent)', label: 'In stock' },
-            ]}
-          />
-        </article>
-        <article className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
-          <h3 className="text-lg font-semibold">Fleet health</h3>
-          <p className="mt-1 mb-4 text-sm text-[var(--muted)]">
-            Working vs not working across the whole office fleet.
-          </p>
-          <StackedBar
-            segments={[
-              { value: data.workingItems, color: 'var(--ok)', label: 'Working' },
-              { value: data.notWorkingItems, color: 'var(--danger)', label: 'Not working' },
-            ]}
-          />
-        </article>
+      <section className="grid gap-4 xl:grid-cols-3">
+        <LivePieChart
+          title="Deployment mix"
+          caption="Issued vs sitting in inventory. Click a slice to inspect the share."
+          data={[
+            { name: 'Issued', value: data.issuedItems },
+            { name: 'In stock', value: data.inStockItems },
+          ]}
+          colors={['teal', 'amber']}
+          centerLabel={`${data.totalItems} total`}
+        />
+        <LivePieChart
+          title="Fleet health"
+          caption="Working vs not working across the office fleet."
+          data={[
+            { name: 'Working', value: data.workingItems },
+            { name: 'Not working', value: data.notWorkingItems },
+          ]}
+          colors={['emerald', 'rose']}
+          centerLabel={`${failRate}% not working`}
+        />
+        <LivePieChart
+          title="Action state"
+          caption="What you can issue today, what is already out, and what needs repair."
+          data={[
+            { name: 'Ready to issue', value: data.workingStockItems },
+            {
+              name: 'Issued and working',
+              value: Math.max(0, data.issuedItems - data.issuedNotWorkingItems),
+            },
+            { name: 'Needs repair', value: data.notWorkingItems },
+          ]}
+          colors={['sky', 'teal', 'rose']}
+          centerLabel={`${data.workingStockItems} ready`}
+        />
       </section>
 
       <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">

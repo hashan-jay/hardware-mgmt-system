@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@config "../tailwind.config.ts";
+@source "../node_modules/@tremor/react/dist";
+@source inline("{fill,stroke,bg}-{teal,amber,emerald,rose,sky,stone}-{400,500,600}");
 
 :root {
   --bg: #f3f5f8;
