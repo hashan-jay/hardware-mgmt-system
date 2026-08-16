@@ -8,7 +8,27 @@ public record DashboardDto(
     int NotWorkingItems,
     int NewAcquisitionItems,
     int ActiveScanCount,
-    IEnumerable<ComponentSummaryDto> Components);
+    int IssuedItems,
+    int InStockItems,
+    int IssuedNotWorkingItems,
+    int WorkingStockItems,
+    int EmployeeCount,
+    int EmployeesWithHardware,
+    IEnumerable<ComponentAnalyticsDto> Components,
+    IEnumerable<EmployeeLoadDto> Holders,
+    IEnumerable<string> Insights);
+
+public record ComponentAnalyticsDto(
+    int Id,
+    string Name,
+    int ItemCount,
+    int IssuedCount,
+    int InStockCount,
+    int WorkingStockCount,
+    int NotWorkingCount,
+    int IssuedNotWorkingCount);
+
+public record EmployeeLoadDto(int EmployeeId, string FullName, int ItemCount);
 
 public record ComponentSummaryDto(int Id, string Name, string CodePrefix, int BrandCount, int ItemCount);
 

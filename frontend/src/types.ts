@@ -83,13 +83,32 @@ export interface Dashboard {
   notWorkingItems: number;
   newAcquisitionItems: number;
   activeScanCount: number;
-  components: Array<{
-    id: number;
-    name: string;
-    codePrefix: string;
-    brandCount: number;
-    itemCount: number;
-  }>;
+  issuedItems: number;
+  inStockItems: number;
+  issuedNotWorkingItems: number;
+  workingStockItems: number;
+  employeeCount: number;
+  employeesWithHardware: number;
+  components: ComponentAnalytics[];
+  holders: EmployeeLoad[];
+  insights: string[];
+}
+
+export interface ComponentAnalytics {
+  id: number;
+  name: string;
+  itemCount: number;
+  issuedCount: number;
+  inStockCount: number;
+  workingStockCount: number;
+  notWorkingCount: number;
+  issuedNotWorkingCount: number;
+}
+
+export interface EmployeeLoad {
+  employeeId: number;
+  fullName: string;
+  itemCount: number;
 }
 
 export interface Scan {
