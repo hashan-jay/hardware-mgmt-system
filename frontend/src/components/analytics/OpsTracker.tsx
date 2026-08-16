@@ -18,11 +18,9 @@ function dayColor(added: number, issued: number, reissued: number): Color {
   return 'gray';
 }
 
-function scanColor(scanned: number, missing: number, status: string): Color {
-  if (status === 'InProgress') return 'amber';
-  if (scanned === 0 && missing === 0) return 'gray';
-  if (missing > 0) return 'rose';
-  return 'emerald';
+function scanColor(scanned: number): Color {
+  if (scanned > 0) return 'emerald';
+  return 'gray';
 }
 
 export default function OpsTracker({ data }: { data: Dashboard }) {
@@ -40,8 +38,8 @@ export default function OpsTracker({ data }: { data: Dashboard }) {
 
   const scans = [...(data.recentScans ?? [])].reverse().map((scan) => ({
     key: String(scan.id),
-    color: scanColor(scan.scannedCount, scan.missingCount, scan.status),
-    tooltip: `${scan.title}: ${scan.scannedCount} present, ${scan.missingCount} missing (${scan.status})`,
+    color: scanColor(scan.scannedCount),
+    tooltip: `${scan.title}: ${scan.scannedCount} scanned`,
   }));
 
   return (
@@ -64,7 +62,7 @@ export default function OpsTracker({ data }: { data: Dashboard }) {
         <div>
           <p className="mb-2 text-sm font-medium">Recent inventory scans</p>
           {scans.length === 0 ? (
-            <p className="text-sm text-[var(--muted)]">No scans recorded yet. Completed scans will track presence here.</p>
+            <p className="text-sm text-[var(--muted)]">No scans recorded yet. Daily scans will track here.</p>
           ) : (
             <>
               <Tracker data={scans} />

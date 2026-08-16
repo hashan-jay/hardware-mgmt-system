@@ -123,6 +123,8 @@ public class DashboardController(AppDbContext db) : ControllerBase
         var workingStock = items.Count(x => !x.Issued && x.Working);
         var notWorking = items.Count(x => !x.Working);
         var employeesWithHardware = holders.Count(x => x.ItemCount > 0);
+        var scannedToday = await db.InventoryScanItems
+            .CountAsync(x => x.IsPresent && x.InventoryScan != null && x.InventoryScan.AuditDate == today);
 
         var dto = new DashboardDto(
             components.Count,
@@ -131,7 +133,7 @@ public class DashboardController(AppDbContext db) : ControllerBase
             items.Count(x => x.Working),
             notWorking,
             items.Count(x => x.IsNewAcquisition),
-            await db.InventoryScans.CountAsync(x => x.Status == ScanStatus.InProgress),
+            scannedToday,
             issuedItems,
             inStockItems,
             issuedNotWorking,
@@ -154,17 +156,18 @@ public class DashboardController(AppDbContext db) : ControllerBase
     {
         return await db.InventoryScans
             .AsNoTracking()
-            .OrderByDescending(scan => scan.StartedAt)
+            .Where(scan => scan.AuditDate != null)
+            .OrderByDescending(scan => scan.AuditDate)
             .Take(14)
             .Select(scan => new ScanPulseDto(
                 scan.Id,
                 scan.Title,
-                scan.StartedAt,
-                scan.Status.ToString(),
+                scan.AuditDate ?? scan.StartedAt,
+                "Open",
                 scan.ScanItems.Count(item => item.IsPresent),
-                scan.ScanItems.Count(item => !item.IsPresent),
-                scan.ScanItems.Count(item => item.WorkingStatus == ItemWorkingStatus.Working),
-                scan.ScanItems.Count(item => item.WorkingStatus == ItemWorkingStatus.NotWorking)))
+                0,
+                scan.ScanItems.Count(item => item.IsPresent && item.WorkingStatus == ItemWorkingStatus.Working),
+                scan.ScanItems.Count(item => item.IsPresent && item.WorkingStatus == ItemWorkingStatus.NotWorking)))
             .ToListAsync();
     }
 

@@ -10,7 +10,6 @@ import EmployeesPage from './pages/EmployeesPage';
 import InventoryPage from './pages/InventoryPage';
 import IssuePage from './pages/IssuePage';
 import LoginPage from './pages/LoginPage';
-import ScanDetailPage from './pages/ScanDetailPage';
 import ScansPage from './pages/ScansPage';
 
 function LegacyScanRedirect() {
@@ -35,7 +34,8 @@ export default function App() {
               <Route path="inventory" element={<InventoryPage />} />
               <Route path="inventory/:id" element={<LegacyScanRedirect />} />
               <Route path="scans" element={<ScansPage />} />
-              <Route path="scans/:id" element={<ScanDetailPage />} />
+              <Route path="scans/reports" element={<Navigate to="/scans" replace />} />
+              <Route path="scans/:id" element={<Navigate to="/scans" replace />} />
               <Route path="audit-logs" element={<AuditLogsPage />} />
             </Route>
           </Route>

@@ -69,6 +69,44 @@ public static class DbSeeder
             IF COL_LENGTH('HardwareItems', 'OriginalIssuedDate') IS NULL
                 ALTER TABLE HardwareItems ADD OriginalIssuedDate datetime2 NULL;
 
+            IF COL_LENGTH('InventoryScans', 'SnapshotReady') IS NULL
+                ALTER TABLE InventoryScans ADD SnapshotReady bit NOT NULL CONSTRAINT DF_InventoryScans_SnapshotReady DEFAULT (0);
+            IF COL_LENGTH('InventoryScans', 'ExpectedCount') IS NULL
+                ALTER TABLE InventoryScans ADD ExpectedCount int NOT NULL CONSTRAINT DF_InventoryScans_ExpectedCount DEFAULT (0);
+            IF COL_LENGTH('InventoryScans', 'NewlyFoundCount') IS NULL
+                ALTER TABLE InventoryScans ADD NewlyFoundCount int NOT NULL CONSTRAINT DF_InventoryScans_NewlyFoundCount DEFAULT (0);
+            IF COL_LENGTH('InventoryScans', 'AuditDate') IS NULL
+                ALTER TABLE InventoryScans ADD AuditDate date NULL;
+
+            IF COL_LENGTH('InventoryScanItems', 'IsExpected') IS NULL
+                ALTER TABLE InventoryScanItems ADD IsExpected bit NOT NULL CONSTRAINT DF_InventoryScanItems_IsExpected DEFAULT (1);
+            IF COL_LENGTH('InventoryScanItems', 'ItemWasCreated') IS NULL
+                ALTER TABLE InventoryScanItems ADD ItemWasCreated bit NOT NULL CONSTRAINT DF_InventoryScanItems_ItemWasCreated DEFAULT (0);
+            IF COL_LENGTH('InventoryScanItems', 'UniqueCode') IS NULL
+                ALTER TABLE InventoryScanItems ADD UniqueCode nvarchar(120) NULL;
+            IF COL_LENGTH('InventoryScanItems', 'ComponentName') IS NULL
+                ALTER TABLE InventoryScanItems ADD ComponentName nvarchar(150) NULL;
+            IF COL_LENGTH('InventoryScanItems', 'BrandName') IS NULL
+                ALTER TABLE InventoryScanItems ADD BrandName nvarchar(150) NULL;
+            IF COL_LENGTH('InventoryScanItems', 'ComponentId') IS NULL
+                ALTER TABLE InventoryScanItems ADD ComponentId int NULL;
+            IF COL_LENGTH('InventoryScanItems', 'CurrentEmployeeId') IS NULL
+                ALTER TABLE InventoryScanItems ADD CurrentEmployeeId int NULL;
+            IF COL_LENGTH('InventoryScanItems', 'HolderName') IS NULL
+                ALTER TABLE InventoryScanItems ADD HolderName nvarchar(200) NULL;
+            IF COL_LENGTH('InventoryScanItems', 'Issued') IS NULL
+                ALTER TABLE InventoryScanItems ADD Issued bit NOT NULL CONSTRAINT DF_InventoryScanItems_Issued DEFAULT (0);
+            IF COL_LENGTH('InventoryScanItems', 'NotWorkingReason') IS NULL
+                ALTER TABLE InventoryScanItems ADD NotWorkingReason nvarchar(1000) NULL;
+            IF COL_LENGTH('InventoryScanItems', 'OriginalEmployeeName') IS NULL
+                ALTER TABLE InventoryScanItems ADD OriginalEmployeeName nvarchar(200) NULL;
+            IF COL_LENGTH('InventoryScanItems', 'OriginalIssuedDate') IS NULL
+                ALTER TABLE InventoryScanItems ADD OriginalIssuedDate datetime2 NULL;
+            IF COL_LENGTH('InventoryScanItems', 'HandedDate') IS NULL
+                ALTER TABLE InventoryScanItems ADD HandedDate datetime2 NULL;
+
+            ALTER TABLE InventoryScanItems ALTER COLUMN ScannedAt datetime2 NULL;
+
             IF OBJECT_ID(N'dbo.Employees', N'U') IS NULL
             BEGIN
                 CREATE TABLE dbo.Employees (
@@ -136,6 +174,22 @@ public static class DbSeeder
             """;
 
         await db.Database.ExecuteSqlRawAsync(sql);
+
+        const string cleanupSql = """
+            SET QUOTED_IDENTIFIER ON;
+            DELETE FROM InventoryScanItems
+            WHERE InventoryScanId IN (SELECT Id FROM InventoryScans WHERE AuditDate IS NULL);
+            DELETE FROM InventoryScans WHERE AuditDate IS NULL;
+
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = 'IX_InventoryScans_AuditDate' AND object_id = OBJECT_ID('InventoryScans'))
+                CREATE UNIQUE INDEX IX_InventoryScans_AuditDate
+                    ON InventoryScans (AuditDate)
+                    WHERE [AuditDate] IS NOT NULL;
+            """;
+
+        await db.Database.ExecuteSqlRawAsync(cleanupSql);
     }
 
     private static async Task NormalizeExistingDataAsync(AppDbContext db)

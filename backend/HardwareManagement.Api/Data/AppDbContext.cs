@@ -76,6 +76,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<InventoryScan>(entity =>
         {
             entity.Property(x => x.Title).HasMaxLength(200);
+            entity.Property(x => x.AuditDate).HasColumnType("date");
+            entity.HasIndex(x => x.AuditDate).IsUnique().HasFilter("[AuditDate] IS NOT NULL");
             entity.HasOne(x => x.CreatedByUser).WithMany(x => x.InventoryScans).HasForeignKey(x => x.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
@@ -83,6 +85,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<InventoryScanItem>(entity =>
         {
             entity.HasIndex(x => new { x.InventoryScanId, x.HardwareItemId }).IsUnique();
+            entity.Property(x => x.UniqueCode).HasMaxLength(120);
+            entity.Property(x => x.ComponentName).HasMaxLength(150);
+            entity.Property(x => x.BrandName).HasMaxLength(150);
+            entity.Property(x => x.HolderName).HasMaxLength(200);
+            entity.Property(x => x.OriginalEmployeeName).HasMaxLength(200);
+            entity.Property(x => x.Notes).HasMaxLength(1000);
+            entity.Property(x => x.NotWorkingReason).HasMaxLength(1000);
             entity.HasOne(x => x.InventoryScan).WithMany(x => x.ScanItems).HasForeignKey(x => x.InventoryScanId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.HardwareItem).WithMany(x => x.ScanItems).HasForeignKey(x => x.HardwareItemId)

@@ -174,6 +174,8 @@ export interface Scan {
   missingCount: number;
   workingCount: number;
   notWorkingCount: number;
+  expectedCount: number;
+  newlyFoundCount: number;
 }
 
 export interface ScanItem {
@@ -182,11 +184,23 @@ export interface ScanItem {
   uniqueCode: string;
   componentName: string;
   brandName: string;
+  componentId?: number | null;
+  currentEmployeeId?: number | null;
+  holderName?: string | null;
+  issued: boolean;
   isPresent: boolean;
+  isExpected: boolean;
+  itemWasCreated: boolean;
   workingStatus: 'Working' | 'NotWorking';
-  scannedAt: string;
+  notWorkingReason?: string | null;
+  scannedAt?: string | null;
   notes?: string | null;
-  itemWasCreated?: boolean;
+  originalEmployeeName?: string | null;
+  originalIssuedDate?: string | null;
+  handedDate?: string | null;
+  scanId?: number | null;
+  scanTitle?: string | null;
+  scanStartedAt?: string | null;
 }
 
 export interface ParseBarcodeResponse {
@@ -217,16 +231,58 @@ export interface MissingItem {
   workingStatus: string;
 }
 
-export interface ScanDetail {
-  id: number;
-  title: string;
-  notes?: string | null;
-  status: 'InProgress' | 'Completed';
-  startedAt: string;
-  completedAt?: string | null;
-  createdBy: string;
+export interface ScanLog {
+  from: string;
+  to: string;
+  isToday: boolean;
+  inSystemCount: number;
+  scannedCount: number;
+  missingCount: number;
   scannedItems: ScanItem[];
-  missingItems: MissingItem[];
+  missingItems: ScanItem[];
+}
+
+export interface ScanReportTotals {
+  auditCount: number;
+  inSystemEntered: number;
+  scanned: number;
+  misplaced: number;
+  extraFound: number;
+  uniqueMisplaced: number;
+  uniqueScanned: number;
+}
+
+export interface ScanReportCategory {
+  componentId?: number | null;
+  name: string;
+  uniqueExpected: number;
+  uniqueScanned: number;
+  uniqueMisplaced: number;
+  missingOccurrences: number;
+}
+
+export interface ScanReportEmployee {
+  employeeId?: number | null;
+  name: string;
+  uniqueAssigned: number;
+  uniqueScanned: number;
+  uniqueMisplaced: number;
+  missingOccurrences: number;
+}
+
+export interface ScanReport {
+  from: string;
+  to: string;
+  componentId?: number | null;
+  employeeId?: number | null;
+  completedScanCount: number;
+  inProgressScanCount: number;
+  totals: ScanReportTotals;
+  scans: Scan[];
+  categories: ScanReportCategory[];
+  employees: ScanReportEmployee[];
+  scannedItems: ScanItem[];
+  missingItems: ScanItem[];
 }
 
 export interface AuditLog {

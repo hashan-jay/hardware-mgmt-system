@@ -4,7 +4,11 @@ namespace HardwareManagement.Api.DTOs;
 
 public record CreateScanRequest(string Title, string? Notes);
 
-public record ScanItemRequest(string UniqueCode, ItemWorkingStatus WorkingStatus, string? Notes = null);
+public record ScanItemRequest(
+    string UniqueCode,
+    ItemWorkingStatus WorkingStatus,
+    string? Notes = null,
+    string? NotWorkingReason = null);
 
 public record ParseBarcodeRequest(string ScannedCode);
 
@@ -26,7 +30,8 @@ public record ConfirmScanRequest(
     bool IsNewAcquisition,
     ItemWorkingStatus WorkingStatus = ItemWorkingStatus.Working,
     string? Notes = null,
-    string? ScannedCode = null);
+    string? ScannedCode = null,
+    string? NotWorkingReason = null);
 
 public record ConfirmScanResponse(
     ScanItemDto ScanItem,
@@ -34,7 +39,10 @@ public record ConfirmScanResponse(
     bool ItemWasCreated,
     string UniqueCode);
 
-public record UpdateScanItemRequest(bool IsPresent, ItemWorkingStatus WorkingStatus, string? Notes);
+public record UpdateScanItemRequest(
+    ItemWorkingStatus WorkingStatus,
+    string? Notes,
+    string? NotWorkingReason = null);
 
 public record ScanDto(
     int Id,
@@ -47,7 +55,9 @@ public record ScanDto(
     int ScannedCount,
     int MissingCount,
     int WorkingCount,
-    int NotWorkingCount);
+    int NotWorkingCount,
+    int ExpectedCount = 0,
+    int NewlyFoundCount = 0);
 
 public record ScanDetailDto(
     int Id,
@@ -57,8 +67,15 @@ public record ScanDetailDto(
     DateTime StartedAt,
     DateTime? CompletedAt,
     string CreatedBy,
+    int ExpectedCount,
+    int ScannedCount,
+    int MissingCount,
+    int NewlyFoundCount,
+    int WorkingCount,
+    int NotWorkingCount,
     IEnumerable<ScanItemDto> ScannedItems,
-    IEnumerable<MissingItemDto> MissingItems);
+    IEnumerable<ScanItemDto> MissingItems,
+    IEnumerable<ScanItemDto> ExtraFoundItems);
 
 public record ScanItemDto(
     int Id,
@@ -66,15 +83,69 @@ public record ScanItemDto(
     string UniqueCode,
     string ComponentName,
     string BrandName,
+    int? ComponentId,
+    int? CurrentEmployeeId,
+    string? HolderName,
+    bool Issued,
     bool IsPresent,
+    bool IsExpected,
+    bool ItemWasCreated,
     string WorkingStatus,
-    DateTime ScannedAt,
+    string? NotWorkingReason,
+    DateTime? ScannedAt,
     string? Notes,
-    bool ItemWasCreated = false);
+    string? OriginalEmployeeName,
+    DateTime? OriginalIssuedDate,
+    DateTime? HandedDate,
+    int? ScanId = null,
+    string? ScanTitle = null,
+    DateTime? ScanStartedAt = null);
 
-public record MissingItemDto(
-    int HardwareItemId,
-    string UniqueCode,
-    string ComponentName,
-    string BrandName,
-    string WorkingStatus);
+public record ScanLogDto(
+    DateTime From,
+    DateTime To,
+    bool IsToday,
+    int InSystemCount,
+    int ScannedCount,
+    int MissingCount,
+    IEnumerable<ScanItemDto> ScannedItems,
+    IEnumerable<ScanItemDto> MissingItems);
+
+public record ScanReportTotalsDto(
+    int AuditCount,
+    int InSystemEntered,
+    int Scanned,
+    int Misplaced,
+    int ExtraFound,
+    int UniqueMisplaced,
+    int UniqueScanned);
+
+public record ScanReportCategoryDto(
+    int? ComponentId,
+    string Name,
+    int UniqueExpected,
+    int UniqueScanned,
+    int UniqueMisplaced,
+    int MissingOccurrences);
+
+public record ScanReportEmployeeDto(
+    int? EmployeeId,
+    string Name,
+    int UniqueAssigned,
+    int UniqueScanned,
+    int UniqueMisplaced,
+    int MissingOccurrences);
+
+public record ScanReportDto(
+    DateTime From,
+    DateTime To,
+    int? ComponentId,
+    int? EmployeeId,
+    int CompletedScanCount,
+    int InProgressScanCount,
+    ScanReportTotalsDto Totals,
+    IEnumerable<ScanDto> Scans,
+    IEnumerable<ScanReportCategoryDto> Categories,
+    IEnumerable<ScanReportEmployeeDto> Employees,
+    IEnumerable<ScanItemDto> ScannedItems,
+    IEnumerable<ScanItemDto> MissingItems);

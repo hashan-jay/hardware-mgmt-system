@@ -74,11 +74,14 @@ textarea {
   }
 
   #item-barcode-print,
-  #item-barcode-print * {
+  #item-barcode-print *,
+  #scan-report-print,
+  #scan-report-print * {
     visibility: visible !important;
   }
 
-  #item-barcode-print {
+  #item-barcode-print,
+  #scan-report-print {
     position: absolute;
     left: 0;
     top: 0;

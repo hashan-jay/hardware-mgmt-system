@@ -5,14 +5,12 @@ import type {
   BrandDetail,
   Component,
   ComponentDetail,
-  ConfirmScanResponse,
   Dashboard,
   Employee,
   Item,
   ParseBarcodeResponse,
-  Scan,
-  ScanDetail,
   ScanItem,
+  ScanLog,
   User,
 } from '../types';
 
@@ -124,19 +122,24 @@ export const itemsApi = {
     const { data } = await api.get<Item>(`/items/by-code/${encodeURIComponent(code)}`);
     return data;
   },
+  get: async (id: number) => {
+    const { data } = await api.get<Item>(`/items/${id}`);
+    return data;
+  },
 };
 
 export const scansApi = {
-  list: async () => {
-    const { data } = await api.get<Scan[]>('/inventoryscans');
+  log: async (from: string, to: string) => {
+    const { data } = await api.get<ScanLog>('/inventoryscans/log', { params: { from, to } });
     return data;
   },
-  get: async (id: number) => {
-    const { data } = await api.get<ScanDetail>(`/inventoryscans/${id}`);
-    return data;
-  },
-  create: async (payload: { title: string; notes?: string }) => {
-    const { data } = await api.post<Scan>('/inventoryscans', payload);
+  record: async (payload: {
+    uniqueCode: string;
+    workingStatus: string;
+    notes?: string;
+    notWorkingReason?: string;
+  }) => {
+    const { data } = await api.post<ScanItem>('/inventoryscans/record', payload);
     return data;
   },
   parseBarcode: async (scannedCode: string) => {
@@ -144,41 +147,6 @@ export const scansApi = {
       scannedCode,
     });
     return data;
-  },
-  confirmScan: async (
-    id: number,
-    payload: {
-      brandId: number;
-      sequenceNumber: number;
-      isNewAcquisition: boolean;
-      workingStatus: string;
-      scannedCode?: string;
-      notes?: string;
-    },
-  ) => {
-    const { data } = await api.post<ConfirmScanResponse>(`/inventoryscans/${id}/scan-confirm`, payload);
-    return data;
-  },
-  scan: async (
-    id: number,
-    payload: { uniqueCode: string; workingStatus: string; notes?: string },
-  ) => {
-    const { data } = await api.post<ScanItem>(`/inventoryscans/${id}/scan`, payload);
-    return data;
-  },
-  updateItem: async (
-    scanId: number,
-    scanItemId: number,
-    payload: { isPresent: boolean; workingStatus: string; notes?: string },
-  ) => {
-    await api.put(`/inventoryscans/${scanId}/items/${scanItemId}`, payload);
-  },
-  complete: async (id: number) => {
-    const { data } = await api.post<ScanDetail>(`/inventoryscans/${id}/complete`);
-    return data;
-  },
-  remove: async (id: number) => {
-    await api.delete(`/inventoryscans/${id}`);
   },
 };
 

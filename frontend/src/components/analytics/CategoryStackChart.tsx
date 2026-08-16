@@ -81,7 +81,7 @@ export default function CategoryStackChart({ data }: { data: Dashboard }) {
       caption="Stacked issued vs stock vs repair. Use this to decide what can go out today and what to buy next."
     >
       <div className="mb-3 text-xs text-[var(--muted)]">
-        {data.componentCount} categories · {data.brandCount} brands · {data.activeScanCount} active scans
+        {data.componentCount} categories · {data.brandCount} brands · {data.activeScanCount} scanned today
       </div>
       {stocked.length === 0 ? (
         <p className="py-8 text-sm text-[var(--muted)]">No items in inventory yet.</p>

@@ -9,6 +9,10 @@ public class InventoryScan
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;
     public DateTime? CompletedAt { get; set; }
     public int CreatedByUserId { get; set; }
+    public DateTime? AuditDate { get; set; }
+    public bool SnapshotReady { get; set; }
+    public int ExpectedCount { get; set; }
+    public int NewlyFoundCount { get; set; }
 
     public User? CreatedByUser { get; set; }
     public ICollection<InventoryScanItem> ScanItems { get; set; } = [];
