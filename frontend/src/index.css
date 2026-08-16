@@ -38,6 +38,16 @@ textarea {
   font: inherit;
 }
 
+.live-donut .recharts-pie-sector {
+  cursor: pointer;
+  outline: none;
+  transition: filter 180ms ease;
+}
+
+.live-donut .recharts-pie-sector:hover {
+  filter: brightness(1.08);
+}
+
 @media print {
   body * {
     visibility: hidden !important;

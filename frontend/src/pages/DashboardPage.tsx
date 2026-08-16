@@ -147,7 +147,7 @@ export default function DashboardPage() {
       <section className="grid gap-4 xl:grid-cols-3">
         <LivePieChart
           title="Deployment mix"
-          caption="Issued vs sitting in inventory. Click a slice to inspect the share."
+          caption="Hover the ring for a tooltip, then click a segment to pin its share."
           data={[
             { name: 'Issued', value: data.issuedItems },
             { name: 'In stock', value: data.inStockItems },
@@ -157,7 +157,7 @@ export default function DashboardPage() {
         />
         <LivePieChart
           title="Fleet health"
-          caption="Working vs not working across the office fleet."
+          caption="Hover the ring for a tooltip, then click a segment to pin its share."
           data={[
             { name: 'Working', value: data.workingItems },
             { name: 'Not working', value: data.notWorkingItems },
@@ -167,7 +167,7 @@ export default function DashboardPage() {
         />
         <LivePieChart
           title="Action state"
-          caption="What you can issue today, what is already out, and what needs repair."
+          caption="Hover the ring for a tooltip, then click a segment to pin its share."
           data={[
             { name: 'Ready to issue', value: data.workingStockItems },
             {
