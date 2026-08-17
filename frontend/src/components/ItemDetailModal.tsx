@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Barcode from './Barcode';
 import StatusToggle from './StatusToggle';
 import { employeesApi, itemsApi } from '../api/services';
+import { formatEmployee } from '../formatEmployee';
 import type { Employee, Item } from '../types';
 
 interface Props {
@@ -208,8 +209,17 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
           <div className="rounded-xl border border-[var(--line)] bg-[var(--bg)] p-4">
             <p className="text-sm font-medium">Person</p>
             <p className="mt-2 text-sm">
-              Original person: <span className="font-semibold">{item.originalEmployeeName || (isIssued ? currentName : '—')}</span>
+              Original person:{' '}
+              <span className="font-semibold">{item.originalEmployeeName || (isIssued ? currentName : '—')}</span>
             </p>
+            {(item.originalEmployeeDepartment || (isIssued && !item.originalEmployeeName && item.currentEmployeeDepartment)) && (
+              <p className="mt-1 text-sm">
+                Original department:{' '}
+                <span className="font-semibold">
+                  {item.originalEmployeeDepartment || item.currentEmployeeDepartment}
+                </span>
+              </p>
+            )}
             <p className="mt-1 text-sm">
               Original issued date:{' '}
               <span className="font-semibold">{formatDate(item.originalIssuedDate || item.handedDate)}</span>
@@ -217,6 +227,11 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
             <p className="mt-1 text-sm">
               Current person: <span className="font-semibold">{isIssued ? currentName : 'Not issued'}</span>
             </p>
+            {isIssued && item.currentEmployeeDepartment && (
+              <p className="mt-1 text-sm">
+                Department: <span className="font-semibold">{item.currentEmployeeDepartment}</span>
+              </p>
+            )}
             <p className="mt-1 text-sm">
               Current issued date: <span className="font-semibold">{formatDate(item.handedDate)}</span>
             </p>
@@ -279,7 +294,7 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
                           .filter((employee) => employee.id !== item.currentEmployeeId)
                           .map((employee) => (
                             <option key={employee.id} value={employee.id}>
-                              {employee.fullName}
+                              {formatEmployee(employee.fullName, employee.departmentName, employee.fullName)}
                             </option>
                           ))}
                       </select>

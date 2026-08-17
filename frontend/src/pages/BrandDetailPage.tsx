@@ -249,7 +249,13 @@ export default function BrandDetailPage() {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Issued to">
-                  <p className={`${inputClass} bg-[var(--bg)]`}>{handedTo || 'Not issued'}</p>
+                  <p className={`${inputClass} bg-[var(--bg)]`}>
+                    {handedTo
+                      ? selected?.currentEmployeeDepartment
+                        ? `${handedTo} · ${selected.currentEmployeeDepartment}`
+                        : handedTo
+                      : 'Not issued'}
+                  </p>
                 </Field>
                 <Field label="Issued date">
                   <p className={`${inputClass} bg-[var(--bg)]`}>

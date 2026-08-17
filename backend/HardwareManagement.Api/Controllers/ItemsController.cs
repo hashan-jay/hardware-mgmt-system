@@ -252,5 +252,11 @@ public class ItemsController(AppDbContext db, IAuditService audit) : ControllerB
                 x.CurrentEmployee != null ? x.CurrentEmployee.FullName : null,
                 x.NotWorkingReason,
                 x.PersonChangeReason,
-                x.OriginalIssuedDate));
+                x.OriginalIssuedDate,
+                x.CurrentEmployee != null && x.CurrentEmployee.Department != null
+                    ? x.CurrentEmployee.Department.Name
+                    : null,
+                x.OriginalEmployee != null && x.OriginalEmployee.Department != null
+                    ? x.OriginalEmployee.Department.Name
+                    : null));
 }

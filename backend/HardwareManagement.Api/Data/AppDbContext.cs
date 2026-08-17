@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Brand> Brands => Set<Brand>();
     public DbSet<HardwareItem> HardwareItems => Set<HardwareItem>();
     public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<Department> Departments => Set<Department>();
     public DbSet<InventoryScan> InventoryScans => Set<InventoryScan>();
     public DbSet<InventoryScanItem> InventoryScanItems => Set<InventoryScanItem>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
@@ -69,6 +70,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.HasIndex(x => x.FullName).IsUnique().HasFilter("[IsDeleted] = 0");
             entity.Property(x => x.FullName).HasMaxLength(200);
+            entity.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.Department).WithMany(x => x.Employees).HasForeignKey(x => x.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasIndex(x => x.Name).IsUnique().HasFilter("[IsDeleted] = 0");
+            entity.Property(x => x.Name).HasMaxLength(150);
             entity.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });

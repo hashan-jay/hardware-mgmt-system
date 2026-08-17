@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { brandsApi, componentsApi, employeesApi, itemsApi } from '../api/services';
 import ItemDetailModal from '../components/ItemDetailModal';
+import { formatEmployee } from '../formatEmployee';
 import type { Brand, Component, Employee, Item } from '../types';
 
 function apiMessage(err: unknown, fallback: string) {
@@ -211,7 +212,9 @@ export default function IssuePage() {
               {barcodeItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.uniqueCode}
-                  {item.currentEmployeeName ? ` · ${item.currentEmployeeName}` : ''}
+                  {item.currentEmployeeName
+                    ? ` · ${formatEmployee(item.currentEmployeeName, item.currentEmployeeDepartment)}`
+                    : ''}
                 </option>
               ))}
             </select>
@@ -234,7 +237,7 @@ export default function IssuePage() {
               <option value="">Select employee</option>
               {employees.map((employee) => (
                 <option key={employee.id} value={employee.id}>
-                  {employee.fullName}
+                  {formatEmployee(employee.fullName, employee.departmentName, employee.fullName)}
                 </option>
               ))}
             </select>
@@ -265,7 +268,7 @@ export default function IssuePage() {
           <p className="mt-3 text-sm text-[var(--muted)]">
             Issued date is saved automatically as today.
             {selectedIssueItem.currentEmployeeName
-              ? ` Currently with ${selectedIssueItem.currentEmployeeName}.`
+              ? ` Currently with ${formatEmployee(selectedIssueItem.currentEmployeeName, selectedIssueItem.currentEmployeeDepartment)}.`
               : ' This item is not issued yet.'}
           </p>
         )}
@@ -333,6 +336,7 @@ export default function IssuePage() {
                   <th className="px-2 py-2 font-medium">Brand</th>
                   <th className="px-2 py-2 font-medium">Barcode</th>
                   <th className="px-2 py-2 font-medium">Person</th>
+                  <th className="px-2 py-2 font-medium">Department</th>
                   <th className="px-2 py-2 font-medium">Issued date</th>
                 </tr>
               </thead>
@@ -347,6 +351,7 @@ export default function IssuePage() {
                     <td className="px-2 py-3">{item.brandName}</td>
                     <td className="px-2 py-3 font-medium text-[var(--brand)]">{item.uniqueCode}</td>
                     <td className="px-2 py-3">{item.currentEmployeeName || item.handedTo || '—'}</td>
+                    <td className="px-2 py-3">{item.currentEmployeeDepartment || '—'}</td>
                     <td className="px-2 py-3">
                       {item.handedDate ? new Date(item.handedDate).toLocaleDateString() : '—'}
                     </td>

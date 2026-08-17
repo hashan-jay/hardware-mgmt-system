@@ -62,7 +62,7 @@ public class DashboardController(AppDbContext db) : ControllerBase
         var employees = await db.Employees
             .AsNoTracking()
             .Where(x => !x.IsDeleted)
-            .Select(x => new { x.Id, x.FullName })
+            .Select(x => new { x.Id, x.FullName, DepartmentName = x.Department != null ? x.Department.Name : (string?)null })
             .ToListAsync();
 
         var analytics = components.Select(component =>
@@ -88,7 +88,8 @@ public class DashboardController(AppDbContext db) : ControllerBase
             .Select(employee => new EmployeeLoadDto(
                 employee.Id,
                 employee.FullName,
-                items.Count(x => x.CurrentEmployeeId == employee.Id)))
+                items.Count(x => x.CurrentEmployeeId == employee.Id),
+                employee.DepartmentName))
             .OrderByDescending(x => x.ItemCount)
             .ThenBy(x => x.FullName)
             .ToList();

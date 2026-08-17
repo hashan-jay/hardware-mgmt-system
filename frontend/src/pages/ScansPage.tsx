@@ -161,13 +161,14 @@ export default function ScansPage() {
     if (!log) return;
     downloadCsv(
       `hardware-scan-${from}-to-${to}.csv`,
-      ['Date', 'Barcode', 'Category', 'Brand', 'Holder', 'Working status', 'Scanned at'],
+      ['Date', 'Barcode', 'Category', 'Brand', 'Holder', 'Department', 'Working status', 'Scanned at'],
       log.scannedItems.map((line) => [
         line.scanStartedAt ? new Date(line.scanStartedAt).toLocaleDateString() : '',
         line.uniqueCode,
         line.componentName,
         line.brandName,
         line.holderName || 'In stock',
+        line.holderName ? line.holderDepartment || '—' : '—',
         line.workingStatus,
         line.scannedAt ? new Date(line.scannedAt).toLocaleString() : '',
       ]),
@@ -324,6 +325,7 @@ export default function ScansPage() {
                       <th className="px-2 py-2">Barcode</th>
                       <th className="px-2 py-2">Category / brand</th>
                       <th className="px-2 py-2">Holder</th>
+                      <th className="px-2 py-2">Department</th>
                       <th className="px-2 py-2">Status</th>
                       <th className="px-2 py-2">Scanned at</th>
                     </tr>
@@ -344,6 +346,7 @@ export default function ScansPage() {
                           {item.componentName} / {item.brandName}
                         </td>
                         <td className="px-2 py-3">{item.holderName || 'In stock'}</td>
+                        <td className="px-2 py-3">{item.holderName ? item.holderDepartment || '—' : '—'}</td>
                         <td className="px-2 py-3">{item.workingStatus === 'NotWorking' ? 'Not working' : 'Working'}</td>
                         <td className="px-2 py-3">{item.scannedAt ? new Date(item.scannedAt).toLocaleString() : '—'}</td>
                       </tr>

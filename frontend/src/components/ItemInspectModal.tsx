@@ -34,8 +34,10 @@ export function scanLineToItem(line: ScanItem): Item {
     handedTo: line.holderName,
     handedDate: line.handedDate,
     originalEmployeeName: line.originalEmployeeName,
+    originalEmployeeDepartment: line.originalEmployeeDepartment,
     currentEmployeeId: line.currentEmployeeId,
     currentEmployeeName: line.holderName,
+    currentEmployeeDepartment: line.holderDepartment,
     notWorkingReason: line.notWorkingReason,
     originalIssuedDate: line.originalIssuedDate,
   };
@@ -43,6 +45,8 @@ export function scanLineToItem(line: ScanItem): Item {
 
 export default function ItemInspectModal({ item, line, onClose }: Props) {
   const currentName = item.currentEmployeeName || item.handedTo || line?.holderName || 'Unassigned';
+  const currentDepartment = item.currentEmployeeDepartment || line?.holderDepartment;
+  const originalDepartment = item.originalEmployeeDepartment || line?.originalEmployeeDepartment;
   const isIssued = Boolean(item.currentEmployeeId || line?.issued);
 
   return (
@@ -101,6 +105,12 @@ export default function ItemInspectModal({ item, line, onClose }: Props) {
             <p className="mt-2">
               Original person: <span className="font-semibold">{item.originalEmployeeName || (isIssued ? currentName : '—')}</span>
             </p>
+            {(originalDepartment || (isIssued && !item.originalEmployeeName && currentDepartment)) && (
+              <p className="mt-1">
+                Original department:{' '}
+                <span className="font-semibold">{originalDepartment || currentDepartment}</span>
+              </p>
+            )}
             <p className="mt-1">
               Original issued date:{' '}
               <span className="font-semibold">{formatDay(item.originalIssuedDate || item.handedDate)}</span>
@@ -108,6 +118,11 @@ export default function ItemInspectModal({ item, line, onClose }: Props) {
             <p className="mt-1">
               Current person: <span className="font-semibold">{isIssued ? currentName : 'Not issued'}</span>
             </p>
+            {isIssued && currentDepartment && (
+              <p className="mt-1">
+                Department: <span className="font-semibold">{currentDepartment}</span>
+              </p>
+            )}
             <p className="mt-1">
               Current issued date: <span className="font-semibold">{formatDay(item.handedDate)}</span>
             </p>

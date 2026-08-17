@@ -21,7 +21,12 @@ public class EmployeesController(AppDbContext db, IAuditService audit) : Control
             .AsNoTracking()
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.FullName)
-            .Select(x => new EmployeeDto(x.Id, x.FullName, x.CreatedAt))
+            .Select(x => new EmployeeDto(
+                x.Id,
+                x.FullName,
+                x.CreatedAt,
+                x.DepartmentId,
+                x.Department != null ? x.Department.Name : null))
             .ToListAsync();
 
         return Ok(employees);
@@ -34,6 +39,10 @@ public class EmployeesController(AppDbContext db, IAuditService audit) : Control
         if (string.IsNullOrWhiteSpace(name))
             return BadRequest(new { message = "Employee name is required." });
 
+        var department = await db.Departments.FirstOrDefaultAsync(x => x.Id == request.DepartmentId && !x.IsDeleted);
+        if (department is null)
+            return BadRequest(new { message = "Select a department for this employee." });
+
         var exists = await db.Employees.AnyAsync(x => !x.IsDeleted && x.FullName.ToLower() == name.ToLower());
         if (exists)
             return Conflict(new { message = $"Employee '{name}' already exists." });
@@ -41,14 +50,20 @@ public class EmployeesController(AppDbContext db, IAuditService audit) : Control
         var entity = new Employee
         {
             FullName = name,
+            DepartmentId = department.Id,
             CreatedByUserId = User.GetUserId()
         };
 
         db.Employees.Add(entity);
         await db.SaveChangesAsync();
-        await audit.LogAsync(User.GetUserId(), "Create", "Employee", entity.Id, $"Created employee '{entity.FullName}'");
+        await audit.LogAsync(
+            User.GetUserId(),
+            "Create",
+            "Employee",
+            entity.Id,
+            $"Created employee '{entity.FullName}' in '{department.Name}'");
 
-        return CreatedAtAction(nameof(GetAll), EmployeeDto.From(entity));
+        return Created($"/api/employees/{entity.Id}", EmployeeDto.From(entity, department.Name));
     }
 
     [HttpPut("{id:int}")]
@@ -61,14 +76,24 @@ public class EmployeesController(AppDbContext db, IAuditService audit) : Control
         if (string.IsNullOrWhiteSpace(name))
             return BadRequest(new { message = "Employee name is required." });
 
+        var department = await db.Departments.FirstOrDefaultAsync(x => x.Id == request.DepartmentId && !x.IsDeleted);
+        if (department is null)
+            return BadRequest(new { message = "Select a department for this employee." });
+
         var exists = await db.Employees.AnyAsync(x =>
             !x.IsDeleted && x.FullName.ToLower() == name.ToLower() && x.Id != id);
         if (exists)
             return Conflict(new { message = $"Employee '{name}' already exists." });
 
         entity.FullName = name;
+        entity.DepartmentId = department.Id;
         await db.SaveChangesAsync();
-        await audit.LogAsync(User.GetUserId(), "Update", "Employee", entity.Id, $"Updated employee '{entity.FullName}'");
+        await audit.LogAsync(
+            User.GetUserId(),
+            "Update",
+            "Employee",
+            entity.Id,
+            $"Updated employee '{entity.FullName}' in '{department.Name}'");
 
         return NoContent();
     }

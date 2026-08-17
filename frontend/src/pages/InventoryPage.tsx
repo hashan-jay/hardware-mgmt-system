@@ -303,6 +303,7 @@ export default function InventoryPage() {
                   <th className="px-2 py-2 font-medium">Barcode</th>
                   <th className="px-2 py-2 font-medium">Status</th>
                   <th className="px-2 py-2 font-medium">Issued to</th>
+                  <th className="px-2 py-2 font-medium">Department</th>
                 </tr>
               </thead>
               <tbody>
@@ -319,6 +320,9 @@ export default function InventoryPage() {
                       {item.workingStatus === 'NotWorking' ? 'Not Working' : 'Working'}
                     </td>
                     <td className="px-2 py-3">{item.currentEmployeeName || item.handedTo || 'In stock'}</td>
+                    <td className="px-2 py-3">
+                      {item.currentEmployeeName || item.handedTo ? item.currentEmployeeDepartment || '—' : '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

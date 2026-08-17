@@ -6,7 +6,7 @@ import { pct } from './palette';
 export default function EmployeeLoadList({ data }: { data: Dashboard }) {
   const staffCovered = pct(data.employeesWithHardware, data.employeeCount);
   const rows = data.holders.map((holder) => ({
-    name: holder.fullName,
+    name: holder.departmentName ? `${holder.fullName} · ${holder.departmentName}` : holder.fullName,
     value: holder.itemCount,
   }));
 

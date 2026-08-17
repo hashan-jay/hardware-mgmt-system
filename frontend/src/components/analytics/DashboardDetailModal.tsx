@@ -12,6 +12,7 @@ import {
   formatDay,
   hasSpareFor,
   holderName,
+  holderDepartment,
   isIssued,
   isWorking,
   itemLabel,
@@ -377,6 +378,7 @@ function buildTables(
           { key: 'code', header: 'Hardware ID' },
           { key: 'name', header: 'Item name' },
           { key: 'employee', header: 'Assigned employee' },
+          { key: 'department', header: 'Department' },
           { key: 'issue', header: 'Reported issue' },
           { key: 'date', header: 'Date reported' },
           { key: 'status', header: 'Repair status' },
@@ -385,6 +387,7 @@ function buildTables(
           code: <span className="font-medium text-[var(--brand)]">{item.uniqueCode}</span>,
           name: itemLabel(item),
           employee: holderName(item),
+          department: holderDepartment(item),
           issue: item.notWorkingReason || '—',
           date: formatDay(item.handedDate || item.createdAt),
           status: <Badge tone="rose">Needs repair</Badge>,
@@ -421,12 +424,14 @@ function buildTables(
         empty: 'No hardware is currently issued to staff.',
         columns: [
           { key: 'employee', header: 'Employee name' },
+          { key: 'department', header: 'Department' },
           { key: 'code', header: 'Hardware ID' },
           { key: 'name', header: 'Item name' },
           { key: 'issued', header: 'Date issued' },
         ],
         rows: itemRows(rows, (item) => ({
           employee: holderName(item),
+          department: holderDepartment(item),
           code: <span className="font-medium text-[var(--brand)]">{item.uniqueCode}</span>,
           name: itemLabel(item),
           issued: formatDay(item.originalIssuedDate || item.handedDate),
@@ -481,6 +486,7 @@ function buildTables(
           { key: 'code', header: 'Hardware ID' },
           { key: 'name', header: 'Item name' },
           { key: 'holder', header: 'Current user' },
+          { key: 'department', header: 'Department' },
           { key: 'issue', header: 'Reported issue' },
           { key: 'status', header: 'Health status' },
         ],
@@ -488,6 +494,7 @@ function buildTables(
           code: <span className="font-medium text-[var(--brand)]">{item.uniqueCode}</span>,
           name: itemLabel(item),
           holder: isIssued(item) ? holderName(item) : 'In stock',
+          department: isIssued(item) ? holderDepartment(item) : '—',
           issue: item.notWorkingReason || '—',
           status: healthBadge(item),
         }), () => 'rose'),
@@ -504,6 +511,7 @@ function buildTables(
           { key: 'name', header: 'Item name' },
           { key: 'status', header: 'Deployment status' },
           { key: 'location', header: 'Location / assignee' },
+          { key: 'department', header: 'Department' },
         ],
         rows: itemRows(
           rows,
@@ -512,6 +520,7 @@ function buildTables(
             name: itemLabel(item),
             status: deploymentBadge(item),
             location: isIssued(item) ? holderName(item) : 'In stock',
+            department: isIssued(item) ? holderDepartment(item) : '—',
           }),
           (item) => (isIssued(item) ? 'teal' : 'amber'),
         ),
@@ -552,6 +561,7 @@ function buildTables(
           { key: 'name', header: 'Item name' },
           { key: 'state', header: 'Action state' },
           { key: 'user', header: 'Current user' },
+          { key: 'department', header: 'Department' },
         ],
         rows: itemRows(
           rows,
@@ -560,6 +570,7 @@ function buildTables(
             name: itemLabel(item),
             state: actionBadge(item),
             user: isIssued(item) ? holderName(item) : '—',
+            department: isIssued(item) ? holderDepartment(item) : '—',
           }),
           (item) => {
             const state = actionState(item);
@@ -584,6 +595,7 @@ function buildTables(
         empty: 'No employees currently hold hardware.',
         columns: [
           { key: 'name', header: 'Employee' },
+          { key: 'department', header: 'Department' },
           { key: 'count', header: 'Items held' },
           { key: 'items', header: 'Hardware' },
         ],
@@ -594,6 +606,7 @@ function buildTables(
             tone: 'teal' as Tone,
             cells: {
               name: holder.fullName,
+              department: holder.departmentName || '—',
               count: held.length,
               items: held.map((item) => item.uniqueCode).join(', ') || '—',
             },
@@ -605,12 +618,14 @@ function buildTables(
         empty: 'Every employee currently holds at least one item.',
         columns: [
           { key: 'name', header: 'Employee' },
+          { key: 'department', header: 'Department' },
           { key: 'status', header: 'Coverage' },
         ],
         rows: uncovered.map((employee) => ({
           id: `open-${employee.id}`,
           cells: {
             name: employee.fullName,
+            department: employee.departmentName || '—',
             status: <Badge tone="stone">No hardware</Badge>,
           },
         })),
@@ -637,6 +652,7 @@ function buildTables(
           { key: 'status', header: 'Deployment' },
           { key: 'health', header: 'Health' },
           { key: 'user', header: 'Current user' },
+          { key: 'department', header: 'Department' },
           { key: 'added', header: 'Date added' },
         ],
         rows: itemRows(
@@ -654,6 +670,7 @@ function buildTables(
             status: deploymentBadge(item),
             health: healthBadge(item),
             user: isIssued(item) ? holderName(item) : 'In stock',
+            department: isIssued(item) ? holderDepartment(item) : '—',
             added: formatDay(item.createdAt),
           }),
           (item) => (isWorking(item) ? (isIssued(item) ? 'teal' : 'amber') : 'rose'),
@@ -705,6 +722,7 @@ function buildTables(
         { key: 'code', header: 'Hardware ID' },
         { key: 'type', header: 'Item type' },
         { key: 'user', header: 'Current user' },
+        { key: 'department', header: 'Department' },
         { key: 'health', header: 'Health status' },
         { key: 'spare', header: 'Spare available' },
       ],
@@ -714,6 +732,7 @@ function buildTables(
           code: <span className="font-medium text-[var(--brand)]">{item.uniqueCode}</span>,
           type: itemLabel(item),
           user: isIssued(item) ? holderName(item) : 'In stock',
+          department: isIssued(item) ? holderDepartment(item) : '—',
           health: healthBadge(item),
           spare: hasSpareFor(item, data) ? (
             <Badge tone="sky">Yes</Badge>

@@ -171,6 +171,36 @@ public static class DbSeeder
                 ALTER TABLE HardwareItems
                     ADD CONSTRAINT FK_HardwareItems_Employees_CurrentEmployeeId
                     FOREIGN KEY (CurrentEmployeeId) REFERENCES Employees (Id);
+
+            IF OBJECT_ID(N'dbo.Departments', N'U') IS NULL
+            BEGIN
+                CREATE TABLE dbo.Departments (
+                    Id int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    Name nvarchar(150) NOT NULL,
+                    CreatedAt datetime2 NOT NULL,
+                    CreatedByUserId int NOT NULL,
+                    IsDeleted bit NOT NULL CONSTRAINT DF_Departments_IsDeleted DEFAULT (0),
+                    CONSTRAINT FK_Departments_Users_CreatedByUserId
+                        FOREIGN KEY (CreatedByUserId) REFERENCES dbo.Users (Id)
+                );
+            END;
+
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = 'IX_Departments_Name' AND object_id = OBJECT_ID('Departments'))
+                CREATE UNIQUE INDEX IX_Departments_Name
+                    ON Departments (Name)
+                    WHERE [IsDeleted] = 0;
+
+            IF COL_LENGTH('Employees', 'DepartmentId') IS NULL
+                ALTER TABLE Employees ADD DepartmentId int NULL;
+
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.foreign_keys
+                WHERE name = 'FK_Employees_Departments_DepartmentId')
+                ALTER TABLE Employees
+                    ADD CONSTRAINT FK_Employees_Departments_DepartmentId
+                    FOREIGN KEY (DepartmentId) REFERENCES Departments (Id);
             """;
 
         await db.Database.ExecuteSqlRawAsync(sql);
@@ -259,7 +289,7 @@ public static class DbSeeder
 
     private static async Task MigrateEmployeesAsync(AppDbContext db)
     {
-        var userId = await db.Users.Select(x => x.Id).FirstOrDefaultAsync();
+        var userId = await db.Users.OrderBy(x => x.Id).Select(x => x.Id).FirstOrDefaultAsync();
         if (userId == 0) return;
 
         var names = await db.HardwareItems

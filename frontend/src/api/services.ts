@@ -6,6 +6,7 @@ import type {
   Component,
   ComponentDetail,
   Dashboard,
+  Department,
   Employee,
   Item,
   ParseBarcodeResponse,
@@ -162,14 +163,25 @@ export const employeesApi = {
     const { data } = await api.get<Employee[]>('/employees');
     return data;
   },
-  create: async (payload: { fullName: string }) => {
+  create: async (payload: { fullName: string; departmentId: number }) => {
     const { data } = await api.post<Employee>('/employees', payload);
     return data;
   },
-  update: async (id: number, payload: { fullName: string }) => {
+  update: async (id: number, payload: { fullName: string; departmentId: number }) => {
     await api.put(`/employees/${id}`, payload);
   },
   remove: async (id: number) => {
     await api.delete(`/employees/${id}`);
+  },
+};
+
+export const departmentsApi = {
+  list: async () => {
+    const { data } = await api.get<Department[]>('/departments');
+    return data;
+  },
+  create: async (payload: { name: string }) => {
+    const { data } = await api.post<Department>('/departments', payload);
+    return data;
   },
 };

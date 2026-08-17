@@ -7,7 +7,7 @@ export interface SelectOption {
 }
 
 interface Props {
-  label: string;
+  label?: string;
   placeholder: string;
   options: SelectOption[];
   value: number | null;
@@ -82,7 +82,7 @@ export default function CreatableSelect({
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        `Could not add ${label.toLowerCase()}.`;
+        `Could not add ${label?.toLowerCase() || 'item'}.`;
       setCreateError(message);
     } finally {
       setBusy(false);
@@ -91,7 +91,7 @@ export default function CreatableSelect({
 
   return (
     <div ref={rootRef} className="relative min-w-[180px] flex-1">
-      <span className="mb-1 block text-sm font-medium">{label}</span>
+      {label ? <span className="mb-1 block text-sm font-medium">{label}</span> : null}
       <button
         type="button"
         disabled={disabled}
@@ -147,7 +147,7 @@ export default function CreatableSelect({
           <input
             ref={inputRef}
             className="w-full rounded-md border border-[var(--line)] bg-white px-2 py-1.5 text-sm"
-            placeholder={`New ${label.toLowerCase()} name`}
+            placeholder={`New ${label?.toLowerCase() || 'item'} name`}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {

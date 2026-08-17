@@ -25,6 +25,10 @@ export function holderName(item: Item) {
   return item.currentEmployeeName || item.handedTo || '—';
 }
 
+export function holderDepartment(item: Item) {
+  return item.currentEmployeeDepartment?.trim() || '—';
+}
+
 export function itemLabel(item: Item) {
   return item.brandName ? `${item.componentName} · ${item.brandName}` : item.componentName;
 }

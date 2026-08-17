@@ -76,7 +76,13 @@ public class BrandsController(AppDbContext db, IAuditService audit) : Controller
                         i.CurrentEmployee != null ? i.CurrentEmployee.FullName : null,
                         i.NotWorkingReason,
                         i.PersonChangeReason,
-                        i.OriginalIssuedDate))))
+                        i.OriginalIssuedDate,
+                        i.CurrentEmployee != null && i.CurrentEmployee.Department != null
+                            ? i.CurrentEmployee.Department.Name
+                            : null,
+                        i.OriginalEmployee != null && i.OriginalEmployee.Department != null
+                            ? i.OriginalEmployee.Department.Name
+                            : null))))
             .FirstOrDefaultAsync();
 
         return brand is null ? NotFound() : Ok(brand);

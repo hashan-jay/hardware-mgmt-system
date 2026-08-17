@@ -47,6 +47,15 @@ export interface Employee {
   id: number;
   fullName: string;
   createdAt: string;
+  departmentId?: number | null;
+  departmentName?: string | null;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  createdAt: string;
+  employeeCount: number;
 }
 
 export interface Item {
@@ -70,6 +79,8 @@ export interface Item {
   originalEmployeeName?: string | null;
   currentEmployeeId?: number | null;
   currentEmployeeName?: string | null;
+  currentEmployeeDepartment?: string | null;
+  originalEmployeeDepartment?: string | null;
   notWorkingReason?: string | null;
   personChangeReason?: string | null;
   originalIssuedDate?: string | null;
@@ -114,6 +125,7 @@ export interface EmployeeLoad {
   employeeId: number;
   fullName: string;
   itemCount: number;
+  departmentName?: string | null;
 }
 
 export interface TrendPoint {
@@ -187,6 +199,7 @@ export interface ScanItem {
   componentId?: number | null;
   currentEmployeeId?: number | null;
   holderName?: string | null;
+  holderDepartment?: string | null;
   issued: boolean;
   isPresent: boolean;
   isExpected: boolean;
@@ -196,6 +209,7 @@ export interface ScanItem {
   scannedAt?: string | null;
   notes?: string | null;
   originalEmployeeName?: string | null;
+  originalEmployeeDepartment?: string | null;
   originalIssuedDate?: string | null;
   handedDate?: string | null;
   scanId?: number | null;

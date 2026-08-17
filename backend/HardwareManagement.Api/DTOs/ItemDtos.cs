@@ -42,7 +42,9 @@ public record ItemDto(
     string? CurrentEmployeeName,
     string? NotWorkingReason,
     string? PersonChangeReason,
-    DateTime? OriginalIssuedDate)
+    DateTime? OriginalIssuedDate,
+    string? CurrentEmployeeDepartment = null,
+    string? OriginalEmployeeDepartment = null)
 {
     public static ItemDto From(HardwareItem item) => new(
         item.Id,
@@ -67,5 +69,7 @@ public record ItemDto(
         item.CurrentEmployee?.FullName,
         item.NotWorkingReason,
         item.PersonChangeReason,
-        item.OriginalIssuedDate);
+        item.OriginalIssuedDate,
+        item.CurrentEmployee?.Department?.Name,
+        item.OriginalEmployee?.Department?.Name);
 }

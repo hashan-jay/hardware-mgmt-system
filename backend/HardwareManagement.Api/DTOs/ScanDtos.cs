@@ -99,7 +99,9 @@ public record ScanItemDto(
     DateTime? HandedDate,
     int? ScanId = null,
     string? ScanTitle = null,
-    DateTime? ScanStartedAt = null);
+    DateTime? ScanStartedAt = null,
+    string? HolderDepartment = null,
+    string? OriginalEmployeeDepartment = null);
 
 public record ScanLogDto(
     DateTime From,

@@ -26,10 +26,12 @@ public class ScanAuditService(AppDbContext db)
                         .ThenInclude(x => x.HardwareComponent)
             .Include(x => x.ScanItems)
                 .ThenInclude(x => x.HardwareItem!)
-                    .ThenInclude(x => x.CurrentEmployee)
+                    .ThenInclude(x => x.CurrentEmployee!)
+                        .ThenInclude(x => x.Department)
             .Include(x => x.ScanItems)
                 .ThenInclude(x => x.HardwareItem!)
-                    .ThenInclude(x => x.OriginalEmployee)
+                    .ThenInclude(x => x.OriginalEmployee!)
+                        .ThenInclude(x => x.Department)
             .Where(x => x.AuditDate != null && x.AuditDate >= from && x.AuditDate <= to)
             .OrderBy(x => x.AuditDate)
             .ToListAsync();
@@ -73,7 +75,9 @@ public class ScanAuditService(AppDbContext db)
         var item = await db.HardwareItems
             .Include(x => x.Brand!).ThenInclude(x => x.HardwareComponent)
             .Include(x => x.CurrentEmployee)
+                .ThenInclude(x => x!.Department)
             .Include(x => x.OriginalEmployee)
+                .ThenInclude(x => x!.Department)
             .FirstOrDefaultAsync(x => x.UniqueCode == code && !x.IsDeleted);
 
         if (item is null)
@@ -164,7 +168,9 @@ public class ScanAuditService(AppDbContext db)
         x.HandedDate ?? x.HardwareItem?.HandedDate,
         scan?.Id,
         scan?.Title,
-        scan?.AuditDate ?? scan?.StartedAt);
+        scan?.AuditDate ?? scan?.StartedAt,
+        x.HardwareItem?.CurrentEmployee?.Department?.Name,
+        x.HardwareItem?.OriginalEmployee?.Department?.Name);
 
     private static ScanItemDto FromLiveItem(HardwareItem item) => new(
         0,
@@ -185,7 +191,12 @@ public class ScanAuditService(AppDbContext db)
         item.Notes,
         item.OriginalEmployee?.FullName,
         item.OriginalIssuedDate,
-        item.HandedDate);
+        item.HandedDate,
+        null,
+        null,
+        null,
+        item.CurrentEmployee?.Department?.Name,
+        item.OriginalEmployee?.Department?.Name);
 
     private async Task<List<HardwareItem>> LoadLiveItemsAsync() =>
         await db.HardwareItems
@@ -193,7 +204,9 @@ public class ScanAuditService(AppDbContext db)
             .Where(x => !x.IsDeleted)
             .Include(x => x.Brand!).ThenInclude(x => x.HardwareComponent)
             .Include(x => x.CurrentEmployee)
+                .ThenInclude(x => x!.Department)
             .Include(x => x.OriginalEmployee)
+                .ThenInclude(x => x!.Department)
             .ToListAsync();
 
     private static void ApplySnapshot(InventoryScanItem row, HardwareItem item)

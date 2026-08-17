@@ -33,7 +33,7 @@ public record ComponentAnalyticsDto(
     int NotWorkingCount,
     int IssuedNotWorkingCount);
 
-public record EmployeeLoadDto(int EmployeeId, string FullName, int ItemCount);
+public record EmployeeLoadDto(int EmployeeId, string FullName, int ItemCount, string? DepartmentName = null);
 
 public record TrendPointDto(string Label, string WeekStart, int Added, int Issued, int Reissued);
 
