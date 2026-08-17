@@ -61,14 +61,14 @@ export default function EmployeeHardwareModal({ employee, items, onClose, onSele
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-[var(--overlay)] p-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="employee-hardware-title"
-        className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-white shadow-lg"
+        className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] shadow-lg"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--line)] px-6 py-5">
@@ -114,7 +114,7 @@ export default function EmployeeHardwareModal({ employee, items, onClose, onSele
                       key={item.id}
                       className={
                         onSelectItem
-                          ? 'cursor-pointer border-b border-[var(--line)] last:border-0 hover:bg-[rgba(15,107,92,0.06)]'
+                          ? 'cursor-pointer border-b border-[var(--line)] last:border-0 hover:bg-[var(--brand-soft)]'
                           : 'border-b border-[var(--line)] last:border-0'
                       }
                       onClick={() => onSelectItem?.(item)}

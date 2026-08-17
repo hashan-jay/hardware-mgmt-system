@@ -1,7 +1,7 @@
 import { ResponsivePie } from '@nivo/pie';
 import type { Dashboard } from '../../types';
 import ChartFrame from './ChartFrame';
-import { muted, palette } from './palette';
+import { palette, useThemePalette } from './palette';
 
 interface Props {
   data: Dashboard;
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export default function CategorySharePie({ data, onOpen }: Props) {
+  const colors = useThemePalette();
   const slices = data.components
     .filter((component) => component.itemCount > 0)
     .map((component) => ({
@@ -29,6 +30,7 @@ export default function CategorySharePie({ data, onOpen }: Props) {
         <div className="h-72 cursor-pointer [&_path]:cursor-pointer" onClick={(event) => event.stopPropagation()}>
           <ResponsivePie
             data={slices}
+            theme={colors.nivo}
             margin={{ top: 12, right: 16, bottom: 48, left: 16 }}
             innerRadius={0}
             padAngle={1.4}
@@ -39,7 +41,7 @@ export default function CategorySharePie({ data, onOpen }: Props) {
             borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
             enableArcLinkLabels={slices.length <= 6}
             arcLinkLabelsSkipAngle={12}
-            arcLinkLabelsTextColor={muted}
+            arcLinkLabelsTextColor={colors.muted}
             arcLinkLabelsThickness={1}
             arcLinkLabelsColor={{ from: 'color' }}
             arcLabelsSkipAngle={16}
@@ -57,6 +59,7 @@ export default function CategorySharePie({ data, onOpen }: Props) {
                 itemHeight: 16,
                 symbolSize: 10,
                 symbolShape: 'circle',
+                itemTextColor: colors.muted,
                 onClick: (datum) => onOpen?.(String(datum.id)),
               },
             ]}

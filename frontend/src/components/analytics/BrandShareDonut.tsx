@@ -1,7 +1,7 @@
 import { ResponsivePie } from '@nivo/pie';
 import type { Dashboard } from '../../types';
 import ChartFrame from './ChartFrame';
-import { muted, palette } from './palette';
+import { palette, useThemePalette } from './palette';
 
 interface Props {
   data: Dashboard;
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export default function BrandShareDonut({ data, onOpen }: Props) {
+  const colors = useThemePalette();
   const brands = data.brandShares ?? [];
   const slices = brands.map((brand) => ({
     id: String(brand.id),
@@ -33,6 +34,7 @@ export default function BrandShareDonut({ data, onOpen }: Props) {
         <div className="h-72 cursor-pointer [&_path]:cursor-pointer" onClick={(event) => event.stopPropagation()}>
           <ResponsivePie
             data={slices}
+            theme={colors.nivo}
             margin={{ top: 12, right: 16, bottom: 48, left: 16 }}
             innerRadius={0.58}
             padAngle={1.6}
@@ -57,14 +59,15 @@ export default function BrandShareDonut({ data, onOpen }: Props) {
                 itemHeight: 16,
                 symbolSize: 10,
                 symbolShape: 'circle',
+                itemTextColor: colors.muted,
                 onClick: (datum) => openBrand(String(datum.id)),
               },
             ]}
             tooltip={({ datum }) => {
               const brand = brands.find((entry) => String(entry.id) === String(datum.id));
               return (
-                <div className="rounded-md border border-[var(--line)] bg-white px-2 py-1 text-xs shadow-sm">
-                  <span style={{ color: muted }}>
+                <div className="rounded-md border border-[var(--line)] bg-[var(--surface)] px-2 py-1 text-xs shadow-sm">
+                  <span className="text-[var(--muted)]">
                     {brand ? `${brand.name} · ${brand.componentName}` : datum.label}
                   </span>
                   {': '}

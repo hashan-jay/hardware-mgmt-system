@@ -24,7 +24,7 @@ export default function AuditLogsPage() {
         </p>
       </header>
 
-      <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
         {logs.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">No audit events yet.</p>
         ) : (

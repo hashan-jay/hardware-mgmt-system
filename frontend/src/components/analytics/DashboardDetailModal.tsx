@@ -29,12 +29,12 @@ type Tone = 'rose' | 'emerald' | 'teal' | 'amber' | 'sky' | 'stone';
 
 function Badge({ tone, children }: { tone: Tone; children: ReactNode }) {
   const styles: Record<Tone, string> = {
-    rose: 'bg-rose-50 text-rose-700',
-    emerald: 'bg-emerald-50 text-emerald-800',
-    teal: 'bg-teal-50 text-teal-800',
-    amber: 'bg-amber-50 text-amber-800',
-    sky: 'bg-sky-50 text-sky-800',
-    stone: 'bg-stone-100 text-stone-700',
+    rose: 'bg-rose-50 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
+    emerald: 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
+    teal: 'bg-teal-50 text-teal-800 dark:bg-teal-500/15 dark:text-teal-300',
+    amber: 'bg-amber-50 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
+    sky: 'bg-sky-50 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300',
+    stone: 'bg-stone-100 text-stone-700 dark:bg-stone-500/20 dark:text-stone-300',
   };
   return (
     <span className={`inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ${styles[tone]}`}>{children}</span>
@@ -220,14 +220,14 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden overscroll-none bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden overscroll-none bg-[var(--overlay)] p-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="dashboard-detail-title"
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden overscroll-none rounded-2xl border border-[var(--line)] bg-white shadow-lg"
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden overscroll-none rounded-2xl border border-[var(--line)] bg-[var(--surface)] shadow-lg"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--line)] px-6 py-5">
@@ -252,7 +252,7 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
             <label className="block text-sm">
               <span className="mb-1 block font-medium">Hardware component</span>
               <select
-                className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+                className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
                 value={componentName}
                 onChange={(event) => {
                   setComponentName(event.target.value);
@@ -270,7 +270,7 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
             <label className="block text-sm">
               <span className="mb-1 block font-medium">Brand</span>
               <select
-                className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+                className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
                 value={brandId}
                 onChange={(event) => setBrandId(event.target.value ? Number(event.target.value) : '')}
               >
@@ -341,11 +341,11 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
 }
 
 function rowTone(tone?: Tone) {
-  if (tone === 'rose') return 'bg-rose-50/70';
-  if (tone === 'emerald') return 'bg-emerald-50/50';
-  if (tone === 'teal') return 'bg-teal-50/60';
-  if (tone === 'amber') return 'bg-amber-50/70';
-  if (tone === 'sky') return 'bg-sky-50/70';
+  if (tone === 'rose') return 'bg-rose-50/70 dark:bg-rose-500/10';
+  if (tone === 'emerald') return 'bg-emerald-50/50 dark:bg-emerald-500/10';
+  if (tone === 'teal') return 'bg-teal-50/60 dark:bg-teal-500/10';
+  if (tone === 'amber') return 'bg-amber-50/70 dark:bg-amber-500/10';
+  if (tone === 'sky') return 'bg-sky-50/70 dark:bg-sky-500/10';
   return '';
 }
 

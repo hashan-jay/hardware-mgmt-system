@@ -99,14 +99,14 @@ export default function CreatableSelect({
           if (disabled) return;
           setOpen((current) => !current);
         }}
-        className="flex w-full items-center justify-between rounded-lg border border-[var(--line)] bg-white px-3 py-2 text-left disabled:cursor-not-allowed disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
+        className="flex w-full items-center justify-between rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-left disabled:cursor-not-allowed disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
       >
         <span className={selected ? '' : 'text-[var(--muted)]'}>{selected?.label ?? placeholder}</span>
         <ChevronDown size={16} className="shrink-0 text-[var(--muted)]" />
       </button>
 
       {open && !disabled && (
-        <div className="absolute z-40 mt-1 w-full min-w-[220px] overflow-hidden rounded-lg border border-[var(--line)] bg-white shadow-lg">
+        <div className="absolute z-40 mt-1 w-full min-w-[220px] overflow-hidden rounded-lg border border-[var(--line)] bg-[var(--surface)] shadow-lg">
           <div className="max-h-48 overflow-y-auto">
             {options.length === 0 ? (
               <p className="px-3 py-2 text-sm text-[var(--muted)]">Nothing saved yet. Add one below.</p>
@@ -122,7 +122,7 @@ export default function CreatableSelect({
                     setCreateError('');
                   }}
                   className={`block w-full px-3 py-2 text-left text-sm hover:bg-[var(--bg)] ${
-                    option.id === value ? 'bg-[rgba(15,107,92,0.08)] font-medium text-[var(--brand)]' : ''
+                    option.id === value ? 'bg-[var(--brand-soft)] font-medium text-[var(--brand)]' : ''
                   }`}
                 >
                   {option.label}
@@ -146,7 +146,7 @@ export default function CreatableSelect({
         <div className="mt-2 space-y-2 rounded-lg border border-[var(--line)] bg-[var(--bg)] p-2">
           <input
             ref={inputRef}
-            className="w-full rounded-md border border-[var(--line)] bg-white px-2 py-1.5 text-sm"
+            className="w-full rounded-md border border-[var(--line)] bg-[var(--surface)] px-2 py-1.5 text-sm"
             placeholder={`New ${label?.toLowerCase() || 'item'} name`}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -172,7 +172,7 @@ export default function CreatableSelect({
             <button
               type="button"
               onClick={cancelAdding}
-              className="rounded-md border border-[var(--line)] bg-white px-2 py-1 text-xs"
+              className="rounded-md border border-[var(--line)] bg-[var(--surface)] px-2 py-1 text-xs"
             >
               Cancel
             </button>

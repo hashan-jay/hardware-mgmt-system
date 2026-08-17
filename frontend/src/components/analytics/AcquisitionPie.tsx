@@ -1,7 +1,7 @@
 import { VictoryLegend, VictoryPie } from 'victory';
 import type { Dashboard } from '../../types';
 import ChartFrame from './ChartFrame';
-import { accent, brand, ink, muted } from './palette';
+import { accent, brand, useThemePalette } from './palette';
 
 interface Props {
   data: Dashboard;
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export default function AcquisitionPie({ data, onOpen }: Props) {
+  const colors = useThemePalette();
   const existing = Math.max(0, data.totalItems - data.newAcquisitionItems);
   const slices = [
     { x: 'New intake', y: data.newAcquisitionItems },
@@ -39,7 +40,7 @@ export default function AcquisitionPie({ data, onOpen }: Props) {
             labels={({ datum }) => `${datum.y}`}
             style={{
               data: { cursor: 'pointer' },
-              labels: { fill: ink, fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+              labels: { fill: colors.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer' },
             }}
             events={[
               {
@@ -70,7 +71,7 @@ export default function AcquisitionPie({ data, onOpen }: Props) {
             width={280}
             colorScale={[brand, accent]}
             style={{
-              labels: { fill: muted, fontSize: 12, cursor: 'pointer' },
+              labels: { fill: colors.muted, fontSize: 12, cursor: 'pointer' },
               data: { cursor: 'pointer' },
             }}
             data={slices.map((slice) => ({ name: `${slice.x} · ${slice.y}` }))}

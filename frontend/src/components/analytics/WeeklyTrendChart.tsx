@@ -11,9 +11,10 @@ import {
 } from 'recharts';
 import type { Dashboard } from '../../types';
 import ChartFrame from './ChartFrame';
-import { accent, brand, line, muted, sky } from './palette';
+import { accent, brand, sky, useThemePalette } from './palette';
 
 export default function WeeklyTrendChart({ data }: { data: Dashboard }) {
+  const colors = useThemePalette();
   const rows = data.weeklyTrend ?? [];
   const hasSignal = rows.some((row) => row.added + row.issued + row.reissued > 0);
 
@@ -30,17 +31,21 @@ export default function WeeklyTrendChart({ data }: { data: Dashboard }) {
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke={line} strokeDasharray="3 3" />
-              <XAxis dataKey="label" tick={{ fill: muted, fontSize: 11 }} axisLine={{ stroke: line }} />
-              <YAxis allowDecimals={false} tick={{ fill: muted, fontSize: 11 }} axisLine={{ stroke: line }} />
+              <CartesianGrid stroke={colors.line} strokeDasharray="3 3" />
+              <XAxis dataKey="label" tick={{ fill: colors.muted, fontSize: 11 }} axisLine={{ stroke: colors.line }} />
+              <YAxis allowDecimals={false} tick={{ fill: colors.muted, fontSize: 11 }} axisLine={{ stroke: colors.line }} />
               <Tooltip
                 contentStyle={{
                   borderRadius: 12,
-                  border: `1px solid ${line}`,
+                  border: `1px solid ${colors.line}`,
+                  background: colors.surface,
+                  color: colors.ink,
                   fontSize: 12,
                 }}
+                labelStyle={{ color: colors.ink }}
+                itemStyle={{ color: colors.ink }}
               />
-              <Legend wrapperStyle={{ fontSize: 12, color: muted }} />
+              <Legend wrapperStyle={{ fontSize: 12, color: colors.muted }} />
               <Area
                 type="monotone"
                 dataKey="added"

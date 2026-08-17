@@ -114,7 +114,7 @@ export default function EmployeesPage() {
         </p>
       </header>
 
-      <div className="grid gap-3 rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:grid-cols-[1.2fr_1fr_auto]">
+      <div className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm md:grid-cols-[1.2fr_1fr_auto]">
         <label className="block text-sm">
           <span className="mb-1 block font-medium">Employee name</span>
           <input
@@ -152,7 +152,7 @@ export default function EmployeesPage() {
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       {message && <p className="text-sm text-[var(--ok)]">{message}</p>}
 
-      <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
         {employees.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">No employees yet. Add the people who receive hardware.</p>
         ) : (

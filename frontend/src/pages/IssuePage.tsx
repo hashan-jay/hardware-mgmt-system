@@ -145,12 +145,12 @@ export default function IssuePage() {
         </p>
       </header>
 
-      <div className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
           <label className="block min-w-[180px] flex-1 text-sm">
             <span className="mb-1 block font-medium">1. Hardware Component</span>
             <select
-              className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
               value={componentId ?? ''}
               onChange={(e) => {
                 setComponentId(e.target.value ? Number(e.target.value) : null);
@@ -174,7 +174,7 @@ export default function IssuePage() {
           <label className="block min-w-[180px] flex-1 text-sm">
             <span className="mb-1 block font-medium">2. Brand</span>
             <select
-              className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2 disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
+              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
               value={brandId ?? ''}
               disabled={!componentId}
               onChange={(e) => {
@@ -198,7 +198,7 @@ export default function IssuePage() {
           <label className="block min-w-[180px] flex-1 text-sm">
             <span className="mb-1 block font-medium">3. Barcode</span>
             <select
-              className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2 uppercase disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
+              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 uppercase disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
               value={itemId}
               disabled={!brandId}
               onChange={(e) => {
@@ -230,7 +230,7 @@ export default function IssuePage() {
           <label className="block min-w-[180px] flex-1 text-sm">
             <span className="mb-1 block font-medium">4. Employee</span>
             <select
-              className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
               value={employeeId}
               onChange={(e) => setEmployeeId(e.target.value ? Number(e.target.value) : '')}
             >
@@ -277,7 +277,7 @@ export default function IssuePage() {
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       {message && <p className="text-sm text-[var(--ok)]">{message}</p>}
 
-      <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
         <h3 className="text-lg font-semibold">Existing items</h3>
         <p className="mt-1 text-sm text-[var(--muted)]">
           Items saved in Inventory. Choose a component, then a brand, to view barcodes you can issue.
@@ -287,7 +287,7 @@ export default function IssuePage() {
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Hardware Component</span>
             <select
-              className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
               value={filterComponentId ?? ''}
               onChange={(e) => {
                 setFilterComponentId(e.target.value ? Number(e.target.value) : null);
@@ -306,7 +306,7 @@ export default function IssuePage() {
           <label className="block text-sm">
             <span className="mb-1 block font-medium">Brand</span>
             <select
-              className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2 disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
+              className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2 disabled:bg-[var(--bg)] disabled:text-[var(--muted)]"
               value={filterBrandId ?? ''}
               disabled={!filterComponentId}
               onChange={(e) => setFilterBrandId(e.target.value ? Number(e.target.value) : null)}
@@ -344,7 +344,7 @@ export default function IssuePage() {
                 {visibleItems.map((item) => (
                   <tr
                     key={item.id}
-                    className="cursor-pointer border-b border-[var(--line)] last:border-0 hover:bg-[rgba(15,107,92,0.06)]"
+                    className="cursor-pointer border-b border-[var(--line)] last:border-0 hover:bg-[var(--brand-soft)]"
                     onClick={() => setSelectedItem(item)}
                   >
                     <td className="px-2 py-3 font-medium text-[var(--brand)]">{item.componentName}</td>

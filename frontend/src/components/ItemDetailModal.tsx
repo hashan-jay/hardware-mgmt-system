@@ -133,8 +133,8 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
   };
 
   return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--line)] bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-[var(--overlay)] p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-lg">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-xl font-semibold">{item.uniqueCode}</h3>
@@ -200,7 +200,7 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
                 type="button"
                 disabled={queueBusy}
                 onClick={() => void queueBarcode()}
-                className="rounded-lg bg-[var(--ink)] px-3 py-2 text-sm text-white disabled:opacity-60"
+                className="rounded-lg bg-[var(--inverse)] px-3 py-2 text-sm text-[var(--on-inverse)] disabled:opacity-60"
               >
                 {queueBusy ? 'Queuing...' : 'Queue Barcode'}
               </button>
@@ -288,7 +288,7 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
                 </div>
 
                 {(!isIssued || changeOn) && (
-                  <div className="mt-4 space-y-3 rounded-lg border border-[var(--line)] bg-white p-3">
+                  <div className="mt-4 space-y-3 rounded-lg border border-[var(--line)] bg-[var(--surface)] p-3">
                     {isIssued && (
                       <p className="text-sm text-[var(--muted)]">
                         Original person stays <span className="font-medium text-[var(--ink)]">{originalName}</span>.
@@ -354,8 +354,8 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
       </div>
 
       {confirmOpen && (
-        <div className="absolute inset-0 grid place-items-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-lg">
+        <div className="absolute inset-0 grid place-items-center bg-[var(--overlay)] p-4">
+          <div className="w-full max-w-md rounded-2xl bg-[var(--surface)] p-5 shadow-lg">
             <h4 className="text-lg font-semibold">Change person?</h4>
             <p className="mt-2 text-sm text-[var(--muted)]">
               Are you sure to change the person of this device? The original person will stay on record.

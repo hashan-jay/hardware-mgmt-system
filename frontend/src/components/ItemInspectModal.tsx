@@ -50,8 +50,8 @@ export default function ItemInspectModal({ item, line, onClose }: Props) {
   const isIssued = Boolean(item.currentEmployeeId || line?.issued);
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--line)] bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay)] p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-lg">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-xl font-semibold">{item.uniqueCode}</h3>

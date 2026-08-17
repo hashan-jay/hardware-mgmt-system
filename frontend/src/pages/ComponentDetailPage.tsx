@@ -61,7 +61,7 @@ export default function ComponentDetailPage() {
 
       <form
         onSubmit={onSubmit}
-        className="grid gap-3 rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:grid-cols-[1fr_auto]"
+        className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm md:grid-cols-[1fr_auto]"
       >
         <input
           placeholder="Brand name (e.g. MSI)"
@@ -81,7 +81,7 @@ export default function ComponentDetailPage() {
         {component.brands.map((brand) => (
           <article
             key={brand.id}
-            className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm"
           >
             <h3 className="text-lg font-semibold">{brand.name}</h3>
             <p className="mt-1 text-sm text-[var(--muted)]">{brand.itemCount} items</p>

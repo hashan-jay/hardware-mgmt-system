@@ -85,8 +85,8 @@ export default function ScanConfirmModal({ open, initial, busy, error, onCancel,
   if (!open || !initial) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-[var(--line)] bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--overlay)] p-4">
+      <div className="w-full max-w-lg rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-lg">
         <h3 className="text-xl font-semibold">Confirm scanned item</h3>
         <p className="mt-1 text-sm text-[var(--muted)]">
           Choose the hardware component and brand. The scanned number stays locked.

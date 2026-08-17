@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition ${
-    isActive ? 'bg-[var(--brand)] text-white' : 'text-[var(--muted)] hover:bg-white hover:text-[var(--ink)]'
+    isActive ? 'bg-[var(--brand)] text-white' : 'text-[var(--muted)] hover:bg-[var(--hover)] hover:text-[var(--ink)]'
   }`;
 
 export default function Layout() {
@@ -12,7 +12,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b border-[var(--line)] bg-[rgba(255,255,255,0.85)] p-4 backdrop-blur lg:border-b-0 lg:border-r">
+      <aside className="border-b border-[var(--line)] bg-[var(--sidebar)] p-4 pb-24 backdrop-blur lg:border-b-0 lg:border-r">
         <div className="mb-6">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--brand)]">Office Hardware</p>
           <h1 className="mt-1 text-xl font-semibold text-[var(--ink)]">Asset Control</h1>
@@ -42,7 +42,7 @@ export default function Layout() {
           </NavLink>
         </nav>
 
-        <div className="mt-8 rounded-xl border border-[var(--line)] bg-white p-3">
+        <div className="mt-8 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3">
           <div className="mb-2 flex items-center gap-2 text-sm font-medium">
             <Shield size={16} className="text-[var(--brand)]" />
             {user?.fullName}

@@ -137,7 +137,7 @@ export default function BarcodeManagementPage() {
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
       {message && <p className="text-sm text-[var(--ok)]">{message}</p>}
 
-      <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <ListOrdered size={18} className="text-[var(--brand)]" />
@@ -147,7 +147,7 @@ export default function BarcodeManagementPage() {
             type="button"
             disabled={busy || readyToPrint.length === 0}
             onClick={() => printItems(queue)}
-            className="rounded-lg bg-[var(--ink)] px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+            className="rounded-lg bg-[var(--inverse)] px-3 py-2 text-sm font-medium text-[var(--on-inverse)] disabled:opacity-60"
           >
             Print queued
           </button>
@@ -180,7 +180,7 @@ export default function BarcodeManagementPage() {
                       <td className="px-2 py-3">{item.brandName}</td>
                       <td className="px-2 py-3">
                         <select
-                          className="w-full min-w-[160px] rounded-lg border border-[var(--line)] bg-white px-2 py-1.5"
+                          className="w-full min-w-[160px] rounded-lg border border-[var(--line)] bg-[var(--surface)] px-2 py-1.5"
                           value={sizeMatches ? item.printSizeId ?? '' : ''}
                           onChange={(event) => {
                             const printSizeId = Number(event.target.value);
@@ -222,7 +222,7 @@ export default function BarcodeManagementPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
           <Printer size={18} className="text-[var(--brand)]" />
           <h3 className="text-lg font-semibold">Integrated printers</h3>
@@ -259,7 +259,7 @@ export default function BarcodeManagementPage() {
         <label className="mt-4 block max-w-md text-sm">
           <span className="mb-1 block font-medium">Selected printer</span>
           <select
-            className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+            className="w-full rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2"
             value={selectedPrinter?.id ?? ''}
             onChange={(event) => {
               const id = Number(event.target.value);
@@ -286,7 +286,7 @@ export default function BarcodeManagementPage() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
           <Ruler size={18} className="text-[var(--brand)]" />
           <h3 className="text-lg font-semibold">Printing sizes</h3>

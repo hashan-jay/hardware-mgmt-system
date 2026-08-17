@@ -121,7 +121,7 @@ export default function DashboardPage() {
       <WeeklyTrendChart data={data} />
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <article className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+        <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
           <h3 className="text-lg font-semibold">What to do next</h3>
           <p className="mt-1 mb-4 text-sm text-[var(--muted)]">
             Ranked from the live mix of issued, stock, working status, and the last four weeks of intake vs issues.

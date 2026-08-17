@@ -2,9 +2,10 @@ import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import type { Dashboard } from '../../types';
 import ChartFrame from './ChartFrame';
-import { accent, brand, danger, muted, ok } from './palette';
+import { accent, brand, danger, ok, useThemePalette } from './palette';
 
 export default function CategoryStackChart({ data }: { data: Dashboard }) {
+  const colors = useThemePalette();
   const stocked = data.components.filter((component) => component.itemCount > 0);
   const empty = data.components.filter((component) => component.itemCount === 0);
 
@@ -13,23 +14,26 @@ export default function CategoryStackChart({ data }: { data: Dashboard }) {
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
+        backgroundColor: colors.surface,
+        borderColor: colors.line,
+        textStyle: { color: colors.ink },
       },
       legend: {
         top: 0,
-        textStyle: { color: muted, fontSize: 11 },
+        textStyle: { color: colors.muted, fontSize: 11 },
       },
       grid: { left: 8, right: 16, top: 36, bottom: 8, containLabel: true },
       xAxis: {
         type: 'value',
         minInterval: 1,
-        axisLabel: { color: muted },
-        splitLine: { lineStyle: { color: '#e8eef4' } },
+        axisLabel: { color: colors.muted },
+        splitLine: { lineStyle: { color: colors.line } },
       },
       yAxis: {
         type: 'category',
         data: stocked.map((component) => component.name),
         inverse: true,
-        axisLabel: { color: '#142033', fontSize: 12 },
+        axisLabel: { color: colors.ink, fontSize: 12 },
         axisLine: { show: false },
         axisTick: { show: false },
       },
@@ -72,7 +76,7 @@ export default function CategoryStackChart({ data }: { data: Dashboard }) {
         },
       ],
     }),
-    [stocked],
+    [stocked, colors],
   );
 
   return (

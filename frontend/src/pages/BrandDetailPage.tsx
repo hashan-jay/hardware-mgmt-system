@@ -151,7 +151,7 @@ export default function BrandDetailPage() {
       {error && <p className="text-sm text-[var(--danger)]">{error}</p>}
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_1.2fr]">
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
           <h3 className="mb-4 text-lg font-semibold">Items</h3>
           {brand.items.length === 0 ? (
             <p className="text-sm text-[var(--muted)]">No items yet. Register them from Inventory.</p>
@@ -162,7 +162,7 @@ export default function BrandDetailPage() {
                   key={item.id}
                   className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border px-3 py-3 ${
                     selected?.id === item.id
-                      ? 'border-[var(--brand)] bg-[rgba(15,107,92,0.06)]'
+                      ? 'border-[var(--brand)] bg-[var(--brand-soft)]'
                       : 'border-[var(--line)]'
                   }`}
                 >
@@ -185,7 +185,7 @@ export default function BrandDetailPage() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+        <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
           <h3 className="mb-4 text-lg font-semibold">Item Details</h3>
           {selected ? (
             <div className="space-y-4">
@@ -260,7 +260,7 @@ export default function BrandDetailPage() {
                     setSaving(false);
                   }
                 }}
-                className="rounded-lg bg-[var(--ink)] px-3 py-2 text-sm text-white disabled:opacity-60"
+                className="rounded-lg bg-[var(--inverse)] px-3 py-2 text-sm text-[var(--on-inverse)] disabled:opacity-60"
               >
                 Queue Barcode
               </button>

@@ -193,7 +193,7 @@ export default function ScansPage() {
         </button>
       </header>
 
-      <form className="grid gap-3 rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:grid-cols-[1fr_1fr_auto_auto]">
+      <form className="grid gap-3 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm md:grid-cols-[1fr_1fr_auto_auto]">
         <label className="text-sm">
           <span className="mb-1 block font-medium">Start date</span>
           <input
@@ -232,7 +232,7 @@ export default function ScansPage() {
       </form>
 
       {scanning && viewingToday && (
-        <section className="grid gap-4 rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm lg:grid-cols-2">
+        <section className="grid gap-4 rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm lg:grid-cols-2">
           <form onSubmit={onSubmit} className="space-y-3">
             <h3 className="text-lg font-semibold">Scan for {new Date(`${today}T00:00:00`).toLocaleDateString()}</h3>
             <p className="text-sm text-[var(--muted)]">
@@ -288,15 +288,15 @@ export default function ScansPage() {
       {log && (
         <div id="scan-report-print" className="space-y-6">
           <section className="grid gap-3 sm:grid-cols-3">
-            <article className="rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm">
+            <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 shadow-sm">
               <p className="text-sm text-[var(--muted)]">In the system</p>
               <p className="mt-1 text-3xl font-semibold">{log.inSystemCount}</p>
             </article>
-            <article className="rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm">
+            <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 shadow-sm">
               <p className="text-sm text-[var(--muted)]">Scanned in this date range</p>
               <p className="mt-1 text-3xl font-semibold">{log.scannedCount}</p>
             </article>
-            <article className="rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm">
+            <article className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 shadow-sm">
               <p className="text-sm text-[var(--muted)]">Not scanned in this date range</p>
               <p className={`mt-1 text-3xl font-semibold ${log.missingCount ? 'text-[var(--danger)]' : ''}`}>
                 {log.missingCount}
@@ -304,7 +304,7 @@ export default function ScansPage() {
             </article>
           </section>
 
-          <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+          <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-sm">
             <h3 className="mb-1 text-lg font-semibold">
               {viewingToday ? "Today's scanned items" : `Scanned items · ${rangeLabel}`} ({log.scannedItems.length})
             </h3>

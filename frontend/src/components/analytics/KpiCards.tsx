@@ -33,7 +33,7 @@ export default function KpiCards({ data, onOpen }: Props) {
         title="View issued items that are not working"
         onClick={() => onOpen('issued-not-working')}
         onKeyDown={(event) => openOnKey(event, () => onOpen('issued-not-working'))}
-        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-rose-300 hover:shadow-md"
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 shadow-sm transition hover:border-rose-300 hover:shadow-md dark:hover:border-rose-500"
       >
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -60,7 +60,7 @@ export default function KpiCards({ data, onOpen }: Props) {
         title="View working units ready to issue"
         onClick={() => onOpen('ready-to-issue')}
         onKeyDown={(event) => openOnKey(event, () => onOpen('ready-to-issue'))}
-        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md"
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md dark:hover:border-emerald-500"
       >
         <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
           <PackageCheck size={16} className="text-[var(--ok)]" />
@@ -77,7 +77,7 @@ export default function KpiCards({ data, onOpen }: Props) {
         title="View hardware issued to staff"
         onClick={() => onOpen('issued-to-staff')}
         onKeyDown={(event) => openOnKey(event, () => onOpen('issued-to-staff'))}
-        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-teal-300 hover:shadow-md"
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 shadow-sm transition hover:border-teal-300 hover:shadow-md dark:hover:border-teal-500"
       >
         <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
           <Users size={16} className="text-[var(--brand)]" />
@@ -96,7 +96,7 @@ export default function KpiCards({ data, onOpen }: Props) {
         title="View failure rate by category"
         onClick={() => onOpen('failure-rate')}
         onKeyDown={(event) => openOnKey(event, () => onOpen('failure-rate'))}
-        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-amber-300 hover:shadow-md"
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-[var(--surface)] px-5 py-4 shadow-sm transition hover:border-amber-300 hover:shadow-md dark:hover:border-amber-500"
       >
         <div className="flex items-start justify-between gap-3">
           <div>

@@ -28,7 +28,7 @@ export default function LoginPage() {
     <div className="grid min-h-screen place-items-center p-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-md rounded-2xl border border-[var(--line)] bg-white p-8 shadow-sm"
+        className="w-full max-w-md rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-8 shadow-sm"
       >
         <p className="text-xs uppercase tracking-[0.2em] text-[var(--brand)]">Hardware Management</p>
         <h1 className="mt-2 text-2xl font-semibold">Sign in</h1>
