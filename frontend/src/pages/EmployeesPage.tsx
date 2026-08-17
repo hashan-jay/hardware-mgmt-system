@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { departmentsApi, employeesApi } from '../api/services';
+import { departmentsApi, employeesApi, itemsApi } from '../api/services';
 import CreatableSelect from '../components/CreatableSelect';
-import type { Department, Employee } from '../types';
+import EmployeeHardwareModal, { employeeHardwareCount } from '../components/EmployeeHardwareModal';
+import ItemDetailModal from '../components/ItemDetailModal';
+import type { Department, Employee, Item } from '../types';
 
 function apiMessage(err: unknown, fallback: string) {
   return (err as { response?: { data?: { message?: string } } })?.response?.data?.message || fallback;
@@ -10,6 +12,9 @@ function apiMessage(err: unknown, fallback: string) {
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [name, setName] = useState('');
   const [departmentId, setDepartmentId] = useState<number | null>(null);
   const [error, setError] = useState('');
@@ -22,9 +27,14 @@ export default function EmployeesPage() {
   }));
 
   const load = async () => {
-    const [nextEmployees, nextDepartments] = await Promise.all([employeesApi.list(), departmentsApi.list()]);
+    const [nextEmployees, nextDepartments, nextItems] = await Promise.all([
+      employeesApi.list(),
+      departmentsApi.list(),
+      itemsApi.listAll(),
+    ]);
     setEmployees(nextEmployees);
     setDepartments(nextDepartments);
+    setItems(nextItems);
   };
 
   useEffect(() => {
@@ -100,7 +110,7 @@ export default function EmployeesPage() {
       <header>
         <h2 className="text-2xl font-semibold">Employees</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          Save each employee with a department. Departments you add here are reused in the dropdown.
+          Save each employee with a department, then click a name to see the hardware issued to them.
         </p>
       </header>
 
@@ -156,9 +166,22 @@ export default function EmployeesPage() {
                 </tr>
               </thead>
               <tbody>
-                {employees.map((employee) => (
+                {employees.map((employee) => {
+                  const deviceCount = employeeHardwareCount(items, employee);
+                  return (
                   <tr key={employee.id} className="border-b border-[var(--line)] last:border-0">
-                    <td className="px-2 py-3 font-medium">{employee.fullName}</td>
+                    <td className="px-2 py-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEmployee(employee)}
+                        className="text-left font-medium text-[var(--brand)] hover:underline"
+                      >
+                        {employee.fullName}
+                      </button>
+                      <span className="mt-0.5 block text-xs text-[var(--muted)]">
+                        {deviceCount === 1 ? '1 device' : `${deviceCount} devices`}
+                      </span>
+                    </td>
                     <td className="px-2 py-3 align-top">
                       <CreatableSelect
                         placeholder="Select department"
@@ -179,12 +202,38 @@ export default function EmployeesPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
       </section>
+
+      {selectedEmployee && (
+        <EmployeeHardwareModal
+          employee={selectedEmployee}
+          items={items}
+          onClose={() => {
+            setSelectedEmployee(null);
+            setSelectedItem(null);
+          }}
+          onSelectItem={setSelectedItem}
+        />
+      )}
+
+      {selectedItem && (
+        <ItemDetailModal
+          item={selectedItem}
+          mode="inventory"
+          onClose={() => setSelectedItem(null)}
+          onSaved={async () => {
+            await load();
+            const latest = (await itemsApi.listAll()).find((entry) => entry.id === selectedItem.id);
+            if (latest) setSelectedItem(latest);
+          }}
+        />
+      )}
     </div>
   );
 }
