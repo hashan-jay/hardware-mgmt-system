@@ -509,6 +509,50 @@ function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], em
     ];
   }
 
+  if (detail.kind === 'category' || detail.kind === 'brand' || detail.kind === 'acquisition') {
+    const empty =
+      detail.kind === 'category'
+        ? 'No items in this category yet.'
+        : detail.kind === 'brand'
+          ? 'No items for this brand yet.'
+          : 'No items in this stock slice yet.';
+    return [
+      {
+        empty,
+        columns: [
+          { key: 'code', header: 'Hardware ID' },
+          { key: 'name', header: 'Item name' },
+          { key: 'category', header: 'Category' },
+          { key: 'brand', header: 'Brand' },
+          { key: 'stock', header: 'Stock type' },
+          { key: 'status', header: 'Deployment' },
+          { key: 'health', header: 'Health' },
+          { key: 'user', header: 'Current user' },
+          { key: 'added', header: 'Date added' },
+        ],
+        rows: itemRows(
+          rows,
+          (item) => ({
+            code: <span className="font-medium text-[var(--brand)]">{item.uniqueCode}</span>,
+            name: itemLabel(item),
+            category: item.componentName,
+            brand: item.brandName,
+            stock: item.isNewAcquisition ? (
+              <Badge tone="amber">New intake</Badge>
+            ) : (
+              <Badge tone="teal">Existing fleet</Badge>
+            ),
+            status: deploymentBadge(item),
+            health: healthBadge(item),
+            user: isIssued(item) ? holderName(item) : 'In stock',
+            added: formatDay(item.createdAt),
+          }),
+          (item) => (isWorking(item) ? (isIssued(item) ? 'teal' : 'amber') : 'rose'),
+        ),
+      },
+    ];
+  }
+
   if (detail.kind === 'coverage' && detail.ring === 'Spare coverage') {
     const issuedCategories = data.components.filter((component) => component.issuedCount > 0);
     return [

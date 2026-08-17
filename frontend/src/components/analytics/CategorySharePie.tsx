@@ -3,7 +3,12 @@ import type { Dashboard } from '../../types';
 import ChartFrame from './ChartFrame';
 import { muted, palette } from './palette';
 
-export default function CategorySharePie({ data }: { data: Dashboard }) {
+interface Props {
+  data: Dashboard;
+  onOpen?: (slice?: string) => void;
+}
+
+export default function CategorySharePie({ data, onOpen }: Props) {
   const slices = data.components
     .filter((component) => component.itemCount > 0)
     .map((component) => ({
@@ -15,12 +20,13 @@ export default function CategorySharePie({ data }: { data: Dashboard }) {
   return (
     <ChartFrame
       title="Items by category"
-      caption="Share of the live inventory, so buying and scanning effort follows where the fleet actually sits."
+      caption="Click a slice or legend item to see every unit in that category."
+      onOpen={onOpen ? () => onOpen() : undefined}
     >
       {slices.length === 0 ? (
         <p className="py-10 text-center text-sm text-[var(--muted)]">No items in inventory yet.</p>
       ) : (
-        <div className="h-72">
+        <div className="h-72 cursor-pointer [&_path]:cursor-pointer" onClick={(event) => event.stopPropagation()}>
           <ResponsivePie
             data={slices}
             margin={{ top: 12, right: 16, bottom: 48, left: 16 }}
@@ -38,6 +44,10 @@ export default function CategorySharePie({ data }: { data: Dashboard }) {
             arcLinkLabelsColor={{ from: 'color' }}
             arcLabelsSkipAngle={16}
             arcLabelsTextColor="#ffffff"
+            onClick={(datum, event) => {
+              event.stopPropagation();
+              onOpen?.(String(datum.id));
+            }}
             legends={[
               {
                 anchor: 'bottom',
@@ -47,6 +57,7 @@ export default function CategorySharePie({ data }: { data: Dashboard }) {
                 itemHeight: 16,
                 symbolSize: 10,
                 symbolShape: 'circle',
+                onClick: (datum) => onOpen?.(String(datum.id)),
               },
             ]}
           />

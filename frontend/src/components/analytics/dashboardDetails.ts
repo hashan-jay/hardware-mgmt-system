@@ -8,7 +8,10 @@ export type CoverageRing = 'Staff covered' | 'Issued share' | 'Fleet working' | 
 export type DashboardDetail =
   | { kind: KpiDetailId }
   | { kind: PieDetailId; slice?: string }
-  | { kind: 'coverage'; ring?: CoverageRing };
+  | { kind: 'coverage'; ring?: CoverageRing }
+  | { kind: 'category'; slice?: string }
+  | { kind: 'brand'; slice?: string; brandId?: number }
+  | { kind: 'acquisition'; slice?: string };
 
 export function isIssued(item: Item) {
   return Boolean(item.currentEmployeeId || item.handedTo?.trim());
@@ -74,6 +77,17 @@ export function filterItems(detail: DashboardDetail, items: Item[]) {
       if (detail.ring === 'Issued share') return items.filter(isIssued);
       if (detail.ring === 'Fleet working') return items.filter(isWorking);
       return items;
+    case 'category':
+      if (detail.slice) return items.filter((item) => item.componentName === detail.slice);
+      return items;
+    case 'brand':
+      if (detail.brandId) return items.filter((item) => item.brandId === detail.brandId);
+      if (detail.slice) return items.filter((item) => item.brandName === detail.slice);
+      return items;
+    case 'acquisition':
+      if (detail.slice === 'New intake') return items.filter((item) => item.isNewAcquisition);
+      if (detail.slice === 'Existing fleet') return items.filter((item) => !item.isNewAcquisition);
+      return items;
     default:
       return items;
   }
@@ -92,6 +106,9 @@ export function detailCopy(detail: DashboardDetail, data: Dashboard) {
     'fleet-health': slice ? `Fleet health · ${slice}` : 'Fleet health',
     'action-state': slice ? `Action state · ${slice}` : 'Action state',
     coverage: ring ? `Coverage · ${ring}` : 'Coverage rings',
+    category: slice ? `Items by category · ${slice}` : 'Items by category',
+    brand: slice ? `Items by brand · ${slice}` : 'Items by brand',
+    acquisition: slice ? `New vs existing stock · ${slice}` : 'New vs existing stock',
   };
 
   const captions: Record<DashboardDetail['kind'], string> = {
@@ -111,6 +128,15 @@ export function detailCopy(detail: DashboardDetail, data: Dashboard) {
     coverage: ring
       ? coverageCaption(ring, data)
       : 'Live fleet: who has hardware, how much is out, health, and whether issued categories still have a working spare.',
+    category: slice
+      ? `Every live unit in ${slice}.`
+      : 'Share of the live inventory by hardware component.',
+    brand: slice
+      ? `Every live unit under ${slice}.`
+      : 'Where units sit by brand across the live fleet.',
+    acquisition: slice
+      ? `Items classified as ${slice.toLowerCase()}.`
+      : `${data.newAcquisitionItems} new intake · ${Math.max(0, data.totalItems - data.newAcquisitionItems)} already on the books.`,
   };
 
   return { title: titles[detail.kind], caption: captions[detail.kind] };

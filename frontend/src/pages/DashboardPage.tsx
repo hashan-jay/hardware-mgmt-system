@@ -108,9 +108,12 @@ export default function DashboardPage() {
       <CoverageCircles data={data} onOpen={(ring) => setDetail({ kind: 'coverage', ring })} />
 
       <section className="grid gap-4 xl:grid-cols-3">
-        <CategorySharePie data={data} />
-        <BrandShareDonut data={data} />
-        <AcquisitionPie data={data} />
+        <CategorySharePie data={data} onOpen={(slice) => setDetail({ kind: 'category', slice })} />
+        <BrandShareDonut
+          data={data}
+          onOpen={(slice) => setDetail({ kind: 'brand', slice: slice?.slice, brandId: slice?.brandId })}
+        />
+        <AcquisitionPie data={data} onOpen={(slice) => setDetail({ kind: 'acquisition', slice })} />
       </section>
 
       <OpsTracker data={data} />
