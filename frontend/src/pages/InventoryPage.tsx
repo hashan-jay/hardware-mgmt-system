@@ -3,7 +3,6 @@ import { ChevronRight } from 'lucide-react';
 import { brandsApi, componentsApi, itemsApi } from '../api/services';
 import CreatableSelect from '../components/CreatableSelect';
 import ItemDetailModal from '../components/ItemDetailModal';
-import StatusToggle from '../components/StatusToggle';
 import type { Brand, Component, Item } from '../types';
 
 function apiMessage(err: unknown, fallback: string) {
@@ -17,8 +16,6 @@ export default function InventoryPage() {
   const [componentId, setComponentId] = useState<number | null>(null);
   const [brandId, setBrandId] = useState<number | null>(null);
   const [barcode, setBarcode] = useState('');
-  const [workingStatus, setWorkingStatus] = useState<'Working' | 'NotWorking'>('Working');
-  const [notWorkingReason, setNotWorkingReason] = useState('');
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [filterComponentId, setFilterComponentId] = useState<number | null>(null);
   const [filterBrandId, setFilterBrandId] = useState<number | null>(null);
@@ -106,8 +103,6 @@ export default function InventoryPage() {
 
   const resetForm = () => {
     setBarcode('');
-    setWorkingStatus('Working');
-    setNotWorkingReason('');
   };
 
   const addItem = async () => {
@@ -123,10 +118,6 @@ export default function InventoryPage() {
       setError('Enter a unique barcode for this item.');
       return;
     }
-    if (workingStatus === 'NotWorking' && !notWorkingReason.trim()) {
-      setError('Enter why this device is not working before saving.');
-      return;
-    }
 
     setBusy(true);
     setError('');
@@ -134,8 +125,6 @@ export default function InventoryPage() {
     try {
       const item = await itemsApi.create(brandId, {
         uniqueCode: barcode.trim(),
-        workingStatus,
-        notWorkingReason: workingStatus === 'NotWorking' ? notWorkingReason.trim() : undefined,
       });
       resetForm();
       await Promise.all([loadComponents(), loadItems()]);
@@ -154,7 +143,7 @@ export default function InventoryPage() {
       <header>
         <h2 className="text-2xl font-semibold">Inventory</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          Add new hardware that has arrived. Select or create a component and brand, enter a unique barcode, and set working status.
+          Add new hardware that has arrived. Select or create a component and brand, then enter a unique barcode.
         </p>
       </header>
 
@@ -209,25 +198,6 @@ export default function InventoryPage() {
               }}
             />
           </label>
-
-          <ChevronRight className="hidden shrink-0 text-[var(--muted)] xl:mb-3 xl:block" size={18} />
-
-          <label className="block min-w-[140px] flex-[0.9] text-sm">
-            <span className="mb-1 block font-medium">4. Working status</span>
-            <StatusToggle value={workingStatus} onChange={setWorkingStatus} />
-          </label>
-
-          {workingStatus === 'NotWorking' && (
-            <label className="block w-full text-sm xl:basis-full">
-              <span className="mb-1 block font-medium">Why is this device not working?</span>
-              <textarea
-                className="min-h-20 w-full rounded-lg border border-[var(--line)] px-3 py-2"
-                value={notWorkingReason}
-                onChange={(e) => setNotWorkingReason(e.target.value)}
-                placeholder="Required to save a Not Working item."
-              />
-            </label>
-          )}
 
           <button
             type="button"
