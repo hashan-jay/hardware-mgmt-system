@@ -13,7 +13,7 @@ export default function ThemeToggle() {
         aria-checked={isDark}
         aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         onClick={toggleTheme}
-        className="flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-2 shadow-lg backdrop-blur"
+        className="inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-2 shadow-lg backdrop-blur"
       >
         {isDark ? (
           <Moon size={16} className="text-[var(--brand)]" />
@@ -22,13 +22,13 @@ export default function ThemeToggle() {
         )}
         <span className="text-sm font-medium text-[var(--ink)]">{isDark ? 'Dark Mode' : 'Light Mode'}</span>
         <span
-          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+          className={`relative block h-6 w-10 shrink-0 overflow-hidden rounded-full transition-colors duration-300 ${
             isDark ? 'bg-[var(--brand)]' : 'bg-[var(--line)]'
           }`}
         >
           <span
-            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-300 ${
-              isDark ? 'translate-x-[1.35rem]' : 'translate-x-0.5'
+            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-[left,right] duration-300 ${
+              isDark ? 'right-0.5 left-auto' : 'left-0.5 right-auto'
             }`}
           />
         </span>
