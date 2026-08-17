@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { brandsApi, itemsApi } from '../api/services';
+import { brandsApi, itemsApi, barcodeQueueApi } from '../api/services';
 import Barcode from '../components/Barcode';
 import type { BrandDetail, Item } from '../types';
 
@@ -241,10 +241,28 @@ export default function BrandDetailPage() {
               </div>
 
               <button
-                onClick={() => window.print()}
-                className="rounded-lg bg-[var(--ink)] px-3 py-2 text-sm text-white"
+                type="button"
+                disabled={saving}
+                onClick={async () => {
+                  if (!selected) return;
+                  setSaving(true);
+                  setError('');
+                  setSaveMessage('');
+                  try {
+                    await barcodeQueueApi.queue(selected.id);
+                    setSaveMessage('Barcode added to the print queue. Open Barcode Management to set the size and print.');
+                  } catch (err: unknown) {
+                    setError(
+                      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+                        'Could not queue this barcode.',
+                    );
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="rounded-lg bg-[var(--ink)] px-3 py-2 text-sm text-white disabled:opacity-60"
               >
-                Print barcode
+                Queue Barcode
               </button>
 
               <div className="grid gap-3 sm:grid-cols-2">

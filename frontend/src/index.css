@@ -76,16 +76,22 @@ textarea {
   #item-barcode-print,
   #item-barcode-print *,
   #scan-report-print,
-  #scan-report-print * {
+  #scan-report-print *,
+  #queued-barcode-print,
+  #queued-barcode-print * {
     visibility: visible !important;
   }
 
   #item-barcode-print,
-  #scan-report-print {
+  #scan-report-print,
+  #queued-barcode-print {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
     background: white;
+  }
+
+  #queued-barcode-print {
+    display: block !important;
   }
 }

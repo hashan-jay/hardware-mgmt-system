@@ -9,7 +9,10 @@ import type {
   Department,
   Employee,
   Item,
+  LabelPrinter,
   ParseBarcodeResponse,
+  PrintSize,
+  QueuedBarcode,
   ScanItem,
   ScanLog,
   User,
@@ -183,5 +186,56 @@ export const departmentsApi = {
   create: async (payload: { name: string }) => {
     const { data } = await api.post<Department>('/departments', payload);
     return data;
+  },
+};
+
+export const printersApi = {
+  list: async () => {
+    const { data } = await api.get<LabelPrinter[]>('/printers');
+    return data;
+  },
+  create: async (payload: { name: string }) => {
+    const { data } = await api.post<LabelPrinter>('/printers', payload);
+    return data;
+  },
+  select: async (id: number) => {
+    await api.post(`/printers/${id}/select`);
+  },
+  remove: async (id: number) => {
+    await api.delete(`/printers/${id}`);
+  },
+  listSizes: async (printerId: number) => {
+    const { data } = await api.get<PrintSize[]>(`/printers/${printerId}/sizes`);
+    return data;
+  },
+  createSize: async (
+    printerId: number,
+    payload: { name: string; widthMm: number; heightMm: number; isDefault?: boolean },
+  ) => {
+    const { data } = await api.post<PrintSize>(`/printers/${printerId}/sizes`, payload);
+    return data;
+  },
+  setDefaultSize: async (sizeId: number) => {
+    await api.post(`/printers/sizes/${sizeId}/default`);
+  },
+  removeSize: async (sizeId: number) => {
+    await api.delete(`/printers/sizes/${sizeId}`);
+  },
+};
+
+export const barcodeQueueApi = {
+  list: async () => {
+    const { data } = await api.get<QueuedBarcode[]>('/barcode-queue');
+    return data;
+  },
+  queue: async (hardwareItemId: number) => {
+    const { data } = await api.post<QueuedBarcode>('/barcode-queue', { hardwareItemId });
+    return data;
+  },
+  assignSize: async (id: number, printSizeId: number) => {
+    await api.put(`/barcode-queue/${id}/size`, { printSizeId });
+  },
+  remove: async (id: number) => {
+    await api.delete(`/barcode-queue/${id}`);
   },
 };

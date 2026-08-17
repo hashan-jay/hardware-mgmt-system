@@ -308,3 +308,35 @@ export interface AuditLog {
   details: string;
   createdAt: string;
 }
+
+export interface LabelPrinter {
+  id: number;
+  name: string;
+  isSelected: boolean;
+  createdAt: string;
+  sizeCount: number;
+}
+
+export interface PrintSize {
+  id: number;
+  printerId: number;
+  name: string;
+  widthMm: number;
+  heightMm: number;
+  isDefault: boolean;
+}
+
+export interface QueuedBarcode {
+  id: number;
+  hardwareItemId: number;
+  uniqueCode: string;
+  componentName: string;
+  brandName: string;
+  printSizeId?: number | null;
+  printSizeName?: string | null;
+  widthMm?: number | null;
+  heightMm?: number | null;
+  printerId?: number | null;
+  status: string;
+  createdAt: string;
+}

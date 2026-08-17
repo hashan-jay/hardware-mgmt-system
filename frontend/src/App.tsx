@@ -3,6 +3,7 @@ import Layout from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import AuditLogsPage from './pages/AuditLogsPage';
+import BarcodeManagementPage from './pages/BarcodeManagementPage';
 import BrandDetailPage from './pages/BrandDetailPage';
 import ComponentDetailPage from './pages/ComponentDetailPage';
 import DashboardPage from './pages/DashboardPage';
@@ -36,6 +37,7 @@ export default function App() {
               <Route path="scans" element={<ScansPage />} />
               <Route path="scans/reports" element={<Navigate to="/scans" replace />} />
               <Route path="scans/:id" element={<Navigate to="/scans" replace />} />
+              <Route path="barcodes" element={<BarcodeManagementPage />} />
               <Route path="audit-logs" element={<AuditLogsPage />} />
             </Route>
           </Route>

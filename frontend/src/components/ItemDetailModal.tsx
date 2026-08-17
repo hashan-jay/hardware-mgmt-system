@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Barcode from './Barcode';
 import StatusToggle from './StatusToggle';
-import { employeesApi, itemsApi } from '../api/services';
+import { employeesApi, itemsApi, barcodeQueueApi } from '../api/services';
 import { formatEmployee } from '../formatEmployee';
 import type { Employee, Item } from '../types';
 
@@ -30,6 +30,7 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [queueBusy, setQueueBusy] = useState(false);
 
   useEffect(() => {
     if (mode !== 'issue') return;
@@ -116,9 +117,19 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
     }
   };
 
-  const printBarcode = () => {
+  const queueBarcode = async () => {
     setShowBarcode(true);
-    window.setTimeout(() => window.print(), 50);
+    setQueueBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      await barcodeQueueApi.queue(item.id);
+      setMessage('Barcode added to the print queue. Open Barcode Management to set the size and print.');
+    } catch (err: unknown) {
+      setError(apiMessage(err, 'Could not queue this barcode.'));
+    } finally {
+      setQueueBusy(false);
+    }
   };
 
   return (
@@ -187,10 +198,11 @@ export default function ItemDetailModal({ item, mode, onClose, onSaved }: Props)
               </button>
               <button
                 type="button"
-                onClick={printBarcode}
-                className="rounded-lg bg-[var(--ink)] px-3 py-2 text-sm text-white"
+                disabled={queueBusy}
+                onClick={() => void queueBarcode()}
+                className="rounded-lg bg-[var(--ink)] px-3 py-2 text-sm text-white disabled:opacity-60"
               >
-                Print barcode
+                {queueBusy ? 'Queuing...' : 'Queue Barcode'}
               </button>
             </div>
           </div>

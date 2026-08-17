@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { ClipboardList, Cpu, LayoutDashboard, LogOut, Package, ScanLine, Shield, Users } from 'lucide-react';
+import { Barcode, ClipboardList, Cpu, LayoutDashboard, LogOut, Package, ScanLine, Shield, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -33,6 +33,9 @@ export default function Layout() {
           </NavLink>
           <NavLink to="/scans" className={linkClass}>
             <ScanLine size={16} /> Inventory Scanning
+          </NavLink>
+          <NavLink to="/barcodes" className={linkClass}>
+            <Barcode size={16} /> Barcode Management
           </NavLink>
           <NavLink to="/audit-logs" className={linkClass}>
             <ClipboardList size={16} /> Audit Logs

@@ -17,3 +17,9 @@ public enum ScanStatus
     InProgress = 1,
     Completed = 2
 }
+
+public enum BarcodeQueueStatus
+{
+    Queued = 1,
+    Printed = 2
+}

@@ -201,6 +201,79 @@ public static class DbSeeder
                 ALTER TABLE Employees
                     ADD CONSTRAINT FK_Employees_Departments_DepartmentId
                     FOREIGN KEY (DepartmentId) REFERENCES Departments (Id);
+
+            IF OBJECT_ID(N'dbo.LabelPrinters', N'U') IS NULL
+            BEGIN
+                CREATE TABLE dbo.LabelPrinters (
+                    Id int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    Name nvarchar(150) NOT NULL,
+                    IsSelected bit NOT NULL CONSTRAINT DF_LabelPrinters_IsSelected DEFAULT (0),
+                    CreatedAt datetime2 NOT NULL,
+                    CreatedByUserId int NOT NULL,
+                    IsDeleted bit NOT NULL CONSTRAINT DF_LabelPrinters_IsDeleted DEFAULT (0),
+                    CONSTRAINT FK_LabelPrinters_Users_CreatedByUserId
+                        FOREIGN KEY (CreatedByUserId) REFERENCES dbo.Users (Id)
+                );
+            END;
+
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = 'IX_LabelPrinters_Name' AND object_id = OBJECT_ID('LabelPrinters'))
+                CREATE UNIQUE INDEX IX_LabelPrinters_Name
+                    ON LabelPrinters (Name)
+                    WHERE [IsDeleted] = 0;
+
+            IF OBJECT_ID(N'dbo.PrintSizes', N'U') IS NULL
+            BEGIN
+                CREATE TABLE dbo.PrintSizes (
+                    Id int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    PrinterId int NOT NULL,
+                    Name nvarchar(80) NOT NULL,
+                    WidthMm decimal(8,2) NOT NULL,
+                    HeightMm decimal(8,2) NOT NULL,
+                    IsDefault bit NOT NULL CONSTRAINT DF_PrintSizes_IsDefault DEFAULT (0),
+                    CreatedAt datetime2 NOT NULL,
+                    CreatedByUserId int NOT NULL,
+                    IsDeleted bit NOT NULL CONSTRAINT DF_PrintSizes_IsDeleted DEFAULT (0),
+                    CONSTRAINT FK_PrintSizes_LabelPrinters_PrinterId
+                        FOREIGN KEY (PrinterId) REFERENCES dbo.LabelPrinters (Id),
+                    CONSTRAINT FK_PrintSizes_Users_CreatedByUserId
+                        FOREIGN KEY (CreatedByUserId) REFERENCES dbo.Users (Id)
+                );
+            END;
+
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = 'IX_PrintSizes_PrinterId_Name' AND object_id = OBJECT_ID('PrintSizes'))
+                CREATE UNIQUE INDEX IX_PrintSizes_PrinterId_Name
+                    ON PrintSizes (PrinterId, Name)
+                    WHERE [IsDeleted] = 0;
+
+            IF OBJECT_ID(N'dbo.BarcodeQueueItems', N'U') IS NULL
+            BEGIN
+                CREATE TABLE dbo.BarcodeQueueItems (
+                    Id int IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    HardwareItemId int NOT NULL,
+                    PrintSizeId int NULL,
+                    Status int NOT NULL CONSTRAINT DF_BarcodeQueueItems_Status DEFAULT (1),
+                    CreatedAt datetime2 NOT NULL,
+                    PrintedAt datetime2 NULL,
+                    CreatedByUserId int NOT NULL,
+                    CONSTRAINT FK_BarcodeQueueItems_HardwareItems_HardwareItemId
+                        FOREIGN KEY (HardwareItemId) REFERENCES dbo.HardwareItems (Id),
+                    CONSTRAINT FK_BarcodeQueueItems_PrintSizes_PrintSizeId
+                        FOREIGN KEY (PrintSizeId) REFERENCES dbo.PrintSizes (Id),
+                    CONSTRAINT FK_BarcodeQueueItems_Users_CreatedByUserId
+                        FOREIGN KEY (CreatedByUserId) REFERENCES dbo.Users (Id)
+                );
+            END;
+
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.indexes
+                WHERE name = 'IX_BarcodeQueueItems_HardwareItemId_Queued' AND object_id = OBJECT_ID('BarcodeQueueItems'))
+                CREATE UNIQUE INDEX IX_BarcodeQueueItems_HardwareItemId_Queued
+                    ON BarcodeQueueItems (HardwareItemId)
+                    WHERE [Status] = 1;
             """;
 
         await db.Database.ExecuteSqlRawAsync(sql);

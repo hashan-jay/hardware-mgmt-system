@@ -14,6 +14,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<InventoryScan> InventoryScans => Set<InventoryScan>();
     public DbSet<InventoryScanItem> InventoryScanItems => Set<InventoryScanItem>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<LabelPrinter> LabelPrinters => Set<LabelPrinter>();
+    public DbSet<PrintSize> PrintSizes => Set<PrintSize>();
+    public DbSet<BarcodeQueueItem> BarcodeQueueItems => Set<BarcodeQueueItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -114,6 +117,37 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(x => x.Action).HasMaxLength(100);
             entity.Property(x => x.EntityType).HasMaxLength(100);
             entity.HasOne(x => x.User).WithMany(x => x.AuditLogs).HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LabelPrinter>(entity =>
+        {
+            entity.HasIndex(x => x.Name).IsUnique().HasFilter("[IsDeleted] = 0");
+            entity.Property(x => x.Name).HasMaxLength(150);
+            entity.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PrintSize>(entity =>
+        {
+            entity.HasIndex(x => new { x.PrinterId, x.Name }).IsUnique().HasFilter("[IsDeleted] = 0");
+            entity.Property(x => x.Name).HasMaxLength(80);
+            entity.Property(x => x.WidthMm).HasPrecision(8, 2);
+            entity.Property(x => x.HeightMm).HasPrecision(8, 2);
+            entity.HasOne(x => x.Printer).WithMany(x => x.Sizes).HasForeignKey(x => x.PrinterId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<BarcodeQueueItem>(entity =>
+        {
+            entity.HasIndex(x => x.HardwareItemId).IsUnique().HasFilter("[Status] = 1");
+            entity.HasOne(x => x.HardwareItem).WithMany().HasForeignKey(x => x.HardwareItemId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.PrintSize).WithMany(x => x.QueueItems).HasForeignKey(x => x.PrintSizeId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.CreatedByUser).WithMany().HasForeignKey(x => x.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }
