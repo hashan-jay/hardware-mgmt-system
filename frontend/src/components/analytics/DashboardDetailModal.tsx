@@ -70,6 +70,8 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
   const [items, setItems] = useState<Item[] | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [error, setError] = useState('');
+  const [componentName, setComponentName] = useState('');
+  const [brandId, setBrandId] = useState<number | ''>('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -160,10 +162,59 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    setComponentName('');
+    setBrandId('');
+  }, [detail]);
+
+  const scopedItems = useMemo(() => (items ? filterItems(detail, items) : []), [detail, items]);
+
+  const componentOptions = useMemo(() => {
+    return [...new Set(scopedItems.map((item) => item.componentName))].sort((left, right) =>
+      left.localeCompare(right),
+    );
+  }, [scopedItems]);
+
+  const brandOptions = useMemo(() => {
+    const source = componentName
+      ? scopedItems.filter((item) => item.componentName === componentName)
+      : scopedItems;
+    const map = new Map<number, { id: number; name: string; componentName: string }>();
+    for (const item of source) {
+      if (!map.has(item.brandId)) {
+        map.set(item.brandId, { id: item.brandId, name: item.brandName, componentName: item.componentName });
+      }
+    }
+    return [...map.values()].sort((left, right) => left.name.localeCompare(right.name));
+  }, [scopedItems, componentName]);
+
+  useEffect(() => {
+    if (brandId !== '' && !brandOptions.some((brand) => brand.id === brandId)) {
+      setBrandId('');
+    }
+  }, [brandId, brandOptions]);
+
+  const catalogItems = useMemo(() => {
+    if (!items) return [];
+    return items.filter((item) => {
+      if (componentName && item.componentName !== componentName) return false;
+      if (brandId !== '' && item.brandId !== brandId) return false;
+      return true;
+    });
+  }, [items, componentName, brandId]);
+
+  const visibleItems = useMemo(() => {
+    return scopedItems.filter((item) => {
+      if (componentName && item.componentName !== componentName) return false;
+      if (brandId !== '' && item.brandId !== brandId) return false;
+      return true;
+    });
+  }, [scopedItems, componentName, brandId]);
+
   const { title, caption } = detailCopy(detail, data);
   const tables = useMemo(
-    () => (items ? buildTables(detail, data, items, employees) : []),
-    [detail, data, items, employees],
+    () => (items ? buildTables(detail, data, visibleItems, employees, catalogItems) : []),
+    [detail, data, visibleItems, employees, catalogItems, items],
   );
 
   return (
@@ -195,6 +246,44 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
           </button>
         </div>
 
+        {items ? (
+          <div className="grid shrink-0 gap-3 border-b border-[var(--line)] px-6 py-4 sm:grid-cols-2">
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium">Hardware component</span>
+              <select
+                className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+                value={componentName}
+                onChange={(event) => {
+                  setComponentName(event.target.value);
+                  setBrandId('');
+                }}
+              >
+                <option value="">All</option>
+                {componentOptions.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium">Brand</span>
+              <select
+                className="w-full rounded-lg border border-[var(--line)] bg-white px-3 py-2"
+                value={brandId}
+                onChange={(event) => setBrandId(event.target.value ? Number(event.target.value) : '')}
+              >
+                <option value="">All</option>
+                {brandOptions.map((brand) => (
+                  <option key={brand.id} value={brand.id}>
+                    {componentName ? brand.name : `${brand.name} · ${brand.componentName}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        ) : null}
+
         <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">
           {error ? (
             <p className="text-sm text-[var(--danger)]">{error}</p>
@@ -206,7 +295,11 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
                 <section key={table.heading ?? title}>
                   {table.heading ? <h4 className="mb-3 text-sm font-semibold">{table.heading}</h4> : null}
                   {table.rows.length === 0 ? (
-                    <p className="text-sm text-[var(--muted)]">{table.empty}</p>
+                    <p className="text-sm text-[var(--muted)]">
+                      {componentName || brandId !== ''
+                        ? 'No items match the selected hardware component and brand.'
+                        : table.empty}
+                    </p>
                   ) : (
                     <div className="overflow-x-auto rounded-xl border border-[var(--line)]">
                       <table className="min-w-full text-left text-sm">
@@ -267,8 +360,14 @@ function itemRows(
   }));
 }
 
-function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], employees: Employee[]): TableModel[] {
-  const rows = filterItems(detail, items);
+function buildTables(
+  detail: DashboardDetail,
+  data: Dashboard,
+  items: Item[],
+  employees: Employee[],
+  catalogItems: Item[],
+): TableModel[] {
+  const rows = items;
 
   if (detail.kind === 'issued-not-working') {
     return [
@@ -337,11 +436,17 @@ function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], em
   }
 
   if (detail.kind === 'failure-rate') {
-    const categories = data.components.filter((component) => component.itemCount > 0);
+    const grouped = new Map<string, Item[]>();
+    for (const item of catalogItems) {
+      const list = grouped.get(item.componentName) ?? [];
+      list.push(item);
+      grouped.set(item.componentName, list);
+    }
+    const categories = [...grouped.entries()].sort((left, right) => left[0].localeCompare(right[0]));
     return [
       {
         heading: 'Failure rate by category',
-        empty: 'No hardware categories recorded yet.',
+        empty: 'No hardware categories match these filters.',
         columns: [
           { key: 'name', header: 'Item name' },
           { key: 'total', header: 'Total fleet count' },
@@ -349,22 +454,22 @@ function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], em
           { key: 'rate', header: 'Failure rate' },
           { key: 'history', header: 'Maintenance history' },
         ],
-        rows: categories.map((component) => {
-          const failed = items.filter((item) => item.componentName === component.name && !isWorking(item));
+        rows: categories.map(([name, fleet]) => {
+          const failed = fleet.filter((item) => !isWorking(item));
           const history = failed
             .map((item) => item.notWorkingReason?.trim())
             .filter(Boolean)
             .slice(0, 3)
             .join('; ');
           return {
-            id: `cat-${component.id}`,
-            tone: component.notWorkingCount ? 'amber' : undefined,
+            id: `cat-${name}`,
+            tone: failed.length ? 'amber' : undefined,
             cells: {
-              name: component.name,
-              total: component.itemCount,
-              failures: component.notWorkingCount,
-              rate: `${pct(component.notWorkingCount, component.itemCount)}%`,
-              history: history || (component.notWorkingCount ? 'No reason recorded' : 'No failures'),
+              name,
+              total: fleet.length,
+              failures: failed.length,
+              rate: `${pct(failed.length, fleet.length)}%`,
+              history: history || (failed.length ? 'No reason recorded' : 'No failures'),
             },
           };
         }),
@@ -468,8 +573,11 @@ function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], em
   }
 
   if (detail.kind === 'coverage' && detail.ring === 'Staff covered') {
-    const holders = data.holders;
-    const uncovered = employeesWithoutHardware(employees, items);
+    const holdingIds = new Set(
+      rows.filter(isIssued).map((item) => item.currentEmployeeId).filter((id): id is number => id != null),
+    );
+    const holders = data.holders.filter((holder) => holdingIds.has(holder.employeeId));
+    const uncovered = employeesWithoutHardware(employees, rows);
     return [
       {
         heading: 'Employees with hardware',
@@ -479,17 +587,18 @@ function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], em
           { key: 'count', header: 'Items held' },
           { key: 'items', header: 'Hardware' },
         ],
-        rows: holders.map((holder) => ({
-          id: `emp-${holder.employeeId}`,
-          tone: 'teal' as Tone,
-          cells: {
-            name: holder.fullName,
-            count: holder.itemCount,
-            items: itemsForEmployee(items, holder.employeeId, holder.fullName)
-              .map((item) => item.uniqueCode)
-              .join(', ') || '—',
-          },
-        })),
+        rows: holders.map((holder) => {
+          const held = itemsForEmployee(rows, holder.employeeId, holder.fullName);
+          return {
+            id: `emp-${holder.employeeId}`,
+            tone: 'teal' as Tone,
+            cells: {
+              name: holder.fullName,
+              count: held.length,
+              items: held.map((item) => item.uniqueCode).join(', ') || '—',
+            },
+          };
+        }),
       },
       {
         heading: 'Employees without hardware',
@@ -554,7 +663,8 @@ function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], em
   }
 
   if (detail.kind === 'coverage' && detail.ring === 'Spare coverage') {
-    const issuedCategories = data.components.filter((component) => component.issuedCount > 0);
+    const issuedNames = new Set(catalogItems.filter(isIssued).map((item) => item.componentName));
+    const issuedCategories = data.components.filter((component) => issuedNames.has(component.name));
     return [
       {
         empty: 'No issued categories to cover with a spare.',
@@ -564,21 +674,26 @@ function buildTables(detail: DashboardDetail, data: Dashboard, items: Item[], em
           { key: 'spare', header: 'Working spares' },
           { key: 'status', header: 'Spare coverage' },
         ],
-        rows: issuedCategories.map((component) => ({
-          id: `spare-${component.id}`,
-          tone: component.workingStockCount > 0 ? 'sky' : 'rose',
-          cells: {
-            name: component.name,
-            issued: component.issuedCount,
-            spare: component.workingStockCount,
-            status:
-              component.workingStockCount > 0 ? (
-                <Badge tone="sky">Spare available</Badge>
-              ) : (
-                <Badge tone="rose">No working spare</Badge>
-              ),
-          },
-        })),
+        rows: issuedCategories.map((component) => {
+          const fleet = catalogItems.filter((item) => item.componentName === component.name);
+          const issued = fleet.filter(isIssued).length;
+          const spare = fleet.filter((item) => !isIssued(item) && isWorking(item)).length;
+          return {
+            id: `spare-${component.id}`,
+            tone: spare > 0 ? 'sky' : 'rose',
+            cells: {
+              name: component.name,
+              issued,
+              spare,
+              status:
+                spare > 0 ? (
+                  <Badge tone="sky">Spare available</Badge>
+                ) : (
+                  <Badge tone="rose">No working spare</Badge>
+                ),
+            },
+          };
+        }),
       },
     ];
   }
