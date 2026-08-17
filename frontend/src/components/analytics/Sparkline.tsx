@@ -10,7 +10,7 @@ export default function Sparkline({ values, color }: Props) {
   const max = Math.max(1, ...points.map((point) => point.y));
 
   return (
-    <svg viewBox="0 0 132 40" className="mt-3 h-10 w-full" role="img" aria-hidden>
+    <svg viewBox="0 0 132 40" className="pointer-events-none mt-3 h-10 w-full" role="img" aria-hidden>
       <VictoryArea
         standalone={false}
         width={132}

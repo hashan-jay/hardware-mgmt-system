@@ -11,6 +11,7 @@ interface Props {
   slices: DonutSlice[];
   selectedName?: string | null;
   onSelect: (name: string | null) => void;
+  onSliceClick?: (name: string) => void;
   centerValue: string;
   centerHint: string;
 }
@@ -77,7 +78,7 @@ function splitFullCircle(a0: number, a1: number) {
   ];
 }
 
-export default function Donut3D({ slices, selectedName, onSelect, centerValue, centerHint }: Props) {
+export default function Donut3D({ slices, selectedName, onSelect, onSliceClick, centerValue, centerHint }: Props) {
   const uid = useId().replace(/:/g, '');
   const [hovered, setHovered] = useState<string | null>(null);
   const total = slices.reduce((sum, slice) => sum + slice.value, 0);
@@ -166,7 +167,11 @@ export default function Donut3D({ slices, selectedName, onSelect, centerValue, c
                   className="donut-3d-slice"
                   onMouseEnter={() => setHovered(segment.name)}
                   onMouseLeave={() => setHovered(null)}
-                  onClick={() => onSelect(selectedName === segment.name ? null : segment.name)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onSelect(selectedName === segment.name ? null : segment.name);
+                    onSliceClick?.(segment.name);
+                  }}
                 >
                   <title>{`${segment.name}: ${segment.value}`}</title>
                 </path>

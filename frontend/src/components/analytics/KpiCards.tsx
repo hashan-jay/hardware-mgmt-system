@@ -1,10 +1,24 @@
+import type { KeyboardEvent } from 'react';
 import { AlertTriangle, PackageCheck, ShieldAlert, Users } from 'lucide-react';
 import { ProgressCircle } from '@tremor/react';
 import type { Dashboard } from '../../types';
+import type { KpiDetailId } from './dashboardDetails';
 import { accent, brand, pct } from './palette';
 import Sparkline from './Sparkline';
 
-export default function KpiCards({ data }: { data: Dashboard }) {
+interface Props {
+  data: Dashboard;
+  onOpen: (kind: KpiDetailId) => void;
+}
+
+function openOnKey(event: KeyboardEvent, open: () => void) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    open();
+  }
+}
+
+export default function KpiCards({ data, onOpen }: Props) {
   const issueRate = pct(data.issuedItems, data.totalItems);
   const failRate = pct(data.notWorkingItems, data.totalItems);
   const blockedShare = pct(data.issuedNotWorkingItems, Math.max(data.issuedItems, 1));
@@ -13,7 +27,14 @@ export default function KpiCards({ data }: { data: Dashboard }) {
 
   return (
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <article className="rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm">
+      <article
+        role="button"
+        tabIndex={0}
+        title="View issued items that are not working"
+        onClick={() => onOpen('issued-not-working')}
+        onKeyDown={(event) => openOnKey(event, () => onOpen('issued-not-working'))}
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-rose-300 hover:shadow-md"
+      >
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
@@ -25,13 +46,22 @@ export default function KpiCards({ data }: { data: Dashboard }) {
             </p>
             <p className="mt-1 text-xs text-[var(--muted)]">Staff blocked until repaired or replaced</p>
           </div>
-          <ProgressCircle value={data.issuedItems ? blockedShare : 0} size="md" color="rose">
-            <span className="text-[11px] font-semibold text-[var(--danger)]">{blockedShare}%</span>
-          </ProgressCircle>
+          <div className="pointer-events-none">
+            <ProgressCircle value={data.issuedItems ? blockedShare : 0} size="md" color="rose">
+              <span className="text-[11px] font-semibold text-[var(--danger)]">{blockedShare}%</span>
+            </ProgressCircle>
+          </div>
         </div>
       </article>
 
-      <article className="rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm">
+      <article
+        role="button"
+        tabIndex={0}
+        title="View working units ready to issue"
+        onClick={() => onOpen('ready-to-issue')}
+        onKeyDown={(event) => openOnKey(event, () => onOpen('ready-to-issue'))}
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md"
+      >
         <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
           <PackageCheck size={16} className="text-[var(--ok)]" />
           Ready to issue
@@ -41,7 +71,14 @@ export default function KpiCards({ data }: { data: Dashboard }) {
         <Sparkline values={addedSpark} color={brand} />
       </article>
 
-      <article className="rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm">
+      <article
+        role="button"
+        tabIndex={0}
+        title="View hardware issued to staff"
+        onClick={() => onOpen('issued-to-staff')}
+        onKeyDown={(event) => openOnKey(event, () => onOpen('issued-to-staff'))}
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-teal-300 hover:shadow-md"
+      >
         <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
           <Users size={16} className="text-[var(--brand)]" />
           Issued to staff
@@ -53,7 +90,14 @@ export default function KpiCards({ data }: { data: Dashboard }) {
         <Sparkline values={issuedSpark} color={accent} />
       </article>
 
-      <article className="rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm">
+      <article
+        role="button"
+        tabIndex={0}
+        title="View failure rate by category"
+        onClick={() => onOpen('failure-rate')}
+        onKeyDown={(event) => openOnKey(event, () => onOpen('failure-rate'))}
+        className="cursor-pointer rounded-2xl border border-[var(--line)] bg-white px-5 py-4 shadow-sm transition hover:border-amber-300 hover:shadow-md"
+      >
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 text-sm text-[var(--muted)]">
@@ -67,9 +111,11 @@ export default function KpiCards({ data }: { data: Dashboard }) {
               {data.notWorkingItems} not working of {data.totalItems} total
             </p>
           </div>
-          <ProgressCircle value={failRate} size="md" color="amber">
-            <span className="text-[11px] font-semibold text-[var(--accent)]">{data.notWorkingItems}</span>
-          </ProgressCircle>
+          <div className="pointer-events-none">
+            <ProgressCircle value={failRate} size="md" color="amber">
+              <span className="text-[11px] font-semibold text-[var(--accent)]">{data.notWorkingItems}</span>
+            </ProgressCircle>
+          </div>
         </div>
       </article>
     </section>

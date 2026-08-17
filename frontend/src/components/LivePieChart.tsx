@@ -13,6 +13,7 @@ interface Props {
   data: PieSlice[];
   colors: Color[];
   centerLabel?: string;
+  onOpen?: (slice?: string) => void;
 }
 
 const colorFill: Record<string, string> = {
@@ -24,7 +25,7 @@ const colorFill: Record<string, string> = {
   stone: 'bg-stone-500',
 };
 
-export default function LivePieChart({ title, caption, data, colors, centerLabel }: Props) {
+export default function LivePieChart({ title, caption, data, colors, centerLabel, onOpen }: Props) {
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const slices = data.filter((slice) => slice.value > 0);
   const selectedSlice = slices.find((slice) => slice.name === selectedName);
@@ -37,7 +38,13 @@ export default function LivePieChart({ title, caption, data, colors, centerLabel
   }));
 
   return (
-    <article className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm">
+    <article
+      className={`rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm ${
+        onOpen ? 'cursor-pointer transition hover:border-teal-300 hover:shadow-md' : ''
+      }`}
+      title={onOpen ? `View ${title} details` : undefined}
+      onClick={() => onOpen?.()}
+    >
       <div className="mb-1 flex items-center justify-between gap-2">
         <h3 className="text-lg font-semibold">{title}</h3>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(15,107,92,0.1)] px-2 py-0.5 text-[11px] font-medium text-[var(--brand)]">
@@ -49,11 +56,12 @@ export default function LivePieChart({ title, caption, data, colors, centerLabel
       {slices.length === 0 ? (
         <p className="py-10 text-center text-sm text-[var(--muted)]">No values to chart yet.</p>
       ) : (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center" onClick={(event) => event.stopPropagation()}>
           <Donut3D
             slices={donutSlices}
             selectedName={selectedName}
             onSelect={setSelectedName}
+            onSliceClick={onOpen}
             centerValue={selectedSlice ? `${share}%` : String(total)}
             centerHint={
               selectedSlice ? `${selectedSlice.name} · ${selectedSlice.value}` : centerLabel ?? 'Click a ring'
@@ -66,7 +74,10 @@ export default function LivePieChart({ title, caption, data, colors, centerLabel
                 <button
                   key={slice.name}
                   type="button"
-                  onClick={() => setSelectedName(active ? null : slice.name)}
+                  onClick={() => {
+                    setSelectedName(active ? null : slice.name);
+                    onOpen?.(slice.name);
+                  }}
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition ${
                     active
                       ? 'border-[var(--brand)] bg-[rgba(15,107,92,0.08)] font-medium text-[var(--ink)]'

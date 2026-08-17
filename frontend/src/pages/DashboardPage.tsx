@@ -5,16 +5,19 @@ import BrandShareDonut from '../components/analytics/BrandShareDonut';
 import CategorySharePie from '../components/analytics/CategorySharePie';
 import CategoryStackChart from '../components/analytics/CategoryStackChart';
 import CoverageCircles from '../components/analytics/CoverageCircles';
+import DashboardDetailModal from '../components/analytics/DashboardDetailModal';
 import EmployeeLoadList from '../components/analytics/EmployeeLoadList';
 import KpiCards from '../components/analytics/KpiCards';
 import OpsTracker from '../components/analytics/OpsTracker';
 import WeeklyTrendChart from '../components/analytics/WeeklyTrendChart';
+import type { DashboardDetail } from '../components/analytics/dashboardDetails';
 import LivePieChart from '../components/LivePieChart';
 import type { Dashboard } from '../types';
 import { pct } from '../components/analytics/palette';
 
 export default function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
+  const [detail, setDetail] = useState<DashboardDetail | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -60,32 +63,34 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      <KpiCards data={data} />
+      <KpiCards data={data} onOpen={(kind) => setDetail({ kind })} />
 
       <section className="grid gap-4 xl:grid-cols-3">
         <LivePieChart
           title="Deployment mix"
-          caption="Hover to lift a segment, then click to pin it out of the ring."
+          caption="Click the card for the full list, or a segment for that slice."
           data={[
             { name: 'Issued', value: data.issuedItems },
             { name: 'In stock', value: data.inStockItems },
           ]}
           colors={['teal', 'amber']}
           centerLabel={`${data.totalItems} total`}
+          onOpen={(slice) => setDetail({ kind: 'deployment-mix', slice })}
         />
         <LivePieChart
           title="Fleet health"
-          caption="Hover to lift a segment, then click to pin it out of the ring."
+          caption="Click the card for the full list, or a segment for that slice."
           data={[
             { name: 'Working', value: data.workingItems },
             { name: 'Not working', value: data.notWorkingItems },
           ]}
           colors={['emerald', 'rose']}
           centerLabel={`${failRate}% not working`}
+          onOpen={(slice) => setDetail({ kind: 'fleet-health', slice })}
         />
         <LivePieChart
           title="Action state"
-          caption="Hover to lift a segment, then click to pin it out of the ring."
+          caption="Click the card for the full list, or a segment for that slice."
           data={[
             { name: 'Ready to issue', value: data.workingStockItems },
             {
@@ -96,10 +101,11 @@ export default function DashboardPage() {
           ]}
           colors={['sky', 'teal', 'rose']}
           centerLabel={`${data.workingStockItems} ready`}
+          onOpen={(slice) => setDetail({ kind: 'action-state', slice })}
         />
       </section>
 
-      <CoverageCircles data={data} />
+      <CoverageCircles data={data} onOpen={(ring) => setDetail({ kind: 'coverage', ring })} />
 
       <section className="grid gap-4 xl:grid-cols-3">
         <CategorySharePie data={data} />
@@ -134,6 +140,8 @@ export default function DashboardPage() {
         </article>
         <EmployeeLoadList data={data} />
       </section>
+
+      {detail ? <DashboardDetailModal detail={detail} data={data} onClose={() => setDetail(null)} /> : null}
     </div>
   );
 }

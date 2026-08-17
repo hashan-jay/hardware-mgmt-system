@@ -6,11 +6,18 @@ interface Props {
   children: ReactNode;
   className?: string;
   live?: boolean;
+  onOpen?: () => void;
 }
 
-export default function ChartFrame({ title, caption, children, className = '', live }: Props) {
+export default function ChartFrame({ title, caption, children, className = '', live, onOpen }: Props) {
   return (
-    <article className={`rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm ${className}`}>
+    <article
+      className={`rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm ${className} ${
+        onOpen ? 'cursor-pointer transition hover:border-teal-300 hover:shadow-md' : ''
+      }`}
+      title={onOpen ? `View ${title} details` : undefined}
+      onClick={onOpen}
+    >
       <div className="mb-1 flex items-start justify-between gap-2">
         <h3 className="text-lg font-semibold">{title}</h3>
         {live ? (
