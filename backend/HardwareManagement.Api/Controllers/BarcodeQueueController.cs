@@ -17,8 +17,8 @@ public class BarcodeQueueController(AppDbContext db, IAuditService audit) : Cont
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BarcodeQueueDto>>> GetAll()
     {
-        var items = await MapQuery().OrderByDescending(x => x.CreatedAt).ToListAsync();
-        return Ok(items);
+        var items = await LoadQueuedAsync();
+        return Ok(items.Select(ToDto));
     }
 
     [HttpPost]
@@ -57,8 +57,9 @@ public class BarcodeQueueController(AppDbContext db, IAuditService audit) : Cont
             entity.Id,
             $"Queued barcode '{item.UniqueCode}'");
 
-        var dto = await MapQuery().FirstAsync(x => x.Id == entity.Id);
-        return Created($"/api/barcode-queue/{entity.Id}", dto);
+        entity.HardwareItem = item;
+        entity.PrintSize = defaultSize;
+        return Created($"/api/barcode-queue/{entity.Id}", ToDto(entity));
     }
 
     [HttpPut("{id:int}/size")]
@@ -80,18 +81,6 @@ public class BarcodeQueueController(AppDbContext db, IAuditService audit) : Cont
         return NoContent();
     }
 
-    [HttpPost("{id:int}/printed")]
-    public async Task<IActionResult> MarkPrinted(int id)
-    {
-        var entity = await db.BarcodeQueueItems.FirstOrDefaultAsync(x => x.Id == id && x.Status == BarcodeQueueStatus.Queued);
-        if (entity is null) return NotFound(new { message = "Queued barcode not found." });
-
-        entity.Status = BarcodeQueueStatus.Printed;
-        entity.PrintedAt = DateTime.UtcNow;
-        await db.SaveChangesAsync();
-        return NoContent();
-    }
-
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Remove(int id)
     {
@@ -103,21 +92,26 @@ public class BarcodeQueueController(AppDbContext db, IAuditService audit) : Cont
         return NoContent();
     }
 
-    private IQueryable<BarcodeQueueDto> MapQuery() =>
-        db.BarcodeQueueItems
+    private async Task<List<BarcodeQueueItem>> LoadQueuedAsync() =>
+        await db.BarcodeQueueItems
             .AsNoTracking()
             .Where(x => x.Status == BarcodeQueueStatus.Queued)
-            .Select(x => new BarcodeQueueDto(
-                x.Id,
-                x.HardwareItemId,
-                x.HardwareItem!.UniqueCode,
-                x.HardwareItem.Brand!.HardwareComponent!.Name,
-                x.HardwareItem.Brand.Name,
-                x.PrintSizeId,
-                x.PrintSize != null ? x.PrintSize.Name : null,
-                x.PrintSize != null ? x.PrintSize.WidthMm : null,
-                x.PrintSize != null ? x.PrintSize.HeightMm : null,
-                x.PrintSize != null ? x.PrintSize.PrinterId : null,
-                x.Status.ToString(),
-                x.CreatedAt));
+            .Include(x => x.HardwareItem!).ThenInclude(x => x.Brand!).ThenInclude(x => x.HardwareComponent)
+            .Include(x => x.PrintSize)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+
+    private static BarcodeQueueDto ToDto(BarcodeQueueItem item) => new(
+        item.Id,
+        item.HardwareItemId,
+        item.HardwareItem?.UniqueCode ?? "",
+        item.HardwareItem?.Brand?.HardwareComponent?.Name ?? "",
+        item.HardwareItem?.Brand?.Name ?? "",
+        item.PrintSizeId,
+        item.PrintSize?.Name,
+        item.PrintSize?.WidthMm,
+        item.PrintSize?.HeightMm,
+        item.PrintSize?.PrinterId,
+        "Queued",
+        item.CreatedAt);
 }

@@ -36,7 +36,7 @@ export default function BarcodeManagementPage() {
   };
 
   useEffect(() => {
-    load().catch(() => setError('Failed to load barcode management.'));
+    void load().catch((err: unknown) => setError(apiMessage(err, 'Failed to load barcode management.')));
   }, []);
 
   useEffect(() => {
