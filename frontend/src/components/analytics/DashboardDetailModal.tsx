@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { employeesApi, itemsApi } from '../../api/services';
 import type { Dashboard, Employee, Item } from '../../types';
@@ -70,6 +70,7 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
   const [items, setItems] = useState<Item[] | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [error, setError] = useState('');
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -78,6 +79,70 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previous = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyPaddingRight: body.style.paddingRight,
+      htmlOverscroll: html.style.overscrollBehavior,
+      bodyOverscroll: body.style.overscrollBehavior,
+    };
+    const scrollbarWidth = window.innerWidth - html.clientWidth;
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    html.style.overscrollBehavior = 'none';
+    body.style.overscrollBehavior = 'none';
+    if (scrollbarWidth > 0) {
+      body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    const isInPanel = (target: EventTarget | null) => {
+      const panel = scrollRef.current;
+      return Boolean(panel && target instanceof Node && panel.contains(target));
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      const panel = scrollRef.current;
+      if (!panel) {
+        event.preventDefault();
+        return;
+      }
+
+      const overPanel = isInPanel(event.target);
+      const canScroll = panel.scrollHeight > panel.clientHeight + 1;
+      const atTop = panel.scrollTop <= 0 && event.deltaY < 0;
+      const atBottom =
+        panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1 && event.deltaY > 0;
+
+      if (overPanel && canScroll && !atTop && !atBottom) return;
+
+      event.preventDefault();
+      if (canScroll && !atTop && !atBottom) {
+        panel.scrollTop += event.deltaY;
+      }
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      if (!isInPanel(event.target)) event.preventDefault();
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+
+    return () => {
+      html.style.overflow = previous.htmlOverflow;
+      body.style.overflow = previous.bodyOverflow;
+      body.style.paddingRight = previous.bodyPaddingRight;
+      html.style.overscrollBehavior = previous.htmlOverscroll;
+      body.style.overscrollBehavior = previous.bodyOverscroll;
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -102,15 +167,18 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
   );
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden overscroll-none bg-black/40 p-4"
+      onClick={onClose}
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="dashboard-detail-title"
-        className="max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-[var(--line)] bg-white shadow-lg"
+        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden overscroll-none rounded-2xl border border-[var(--line)] bg-white shadow-lg"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-[var(--line)] px-6 py-5">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--line)] px-6 py-5">
           <div>
             <h3 id="dashboard-detail-title" className="text-xl font-semibold">
               {title}
@@ -127,7 +195,7 @@ export default function DashboardDetailModal({ detail, data, onClose }: Props) {
           </button>
         </div>
 
-        <div className="max-h-[calc(90vh-6.5rem)] overflow-y-auto px-6 py-5">
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">
           {error ? (
             <p className="text-sm text-[var(--danger)]">{error}</p>
           ) : !items ? (
